@@ -30,7 +30,7 @@ const LockerRoom = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card rounded-2xl p-6 space-y-5"
+        className="card-elevated p-6 space-y-5"
       >
         <div className="flex items-center justify-between">
           <span className="sport-badge">
@@ -135,7 +135,7 @@ const LockerRoom = () => {
             <Check className="w-5 h-5" /> You're In!
           </span>
         ) : (
-          "Secure Your Spot (£5)"
+          "Secure Your Spot (£6)"
         )}
       </motion.button>
     </div>
