@@ -20,13 +20,15 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="px-4 pt-6 pb-2">
-        <motion.h1
+        <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-xl font-display font-bold text-gradient-primary text-center"
+          className="text-center"
         >
-          MatchDay FC
-        </motion.h1>
+          <h1 className="text-xl font-display font-bold text-foreground tracking-tight">
+            Thursday Night <span className="text-gradient-primary">Football</span>
+          </h1>
+        </motion.div>
       </header>
 
       {/* Content */}
@@ -47,7 +49,7 @@ const Index = () => {
       </main>
 
       {/* Bottom Nav */}
-      <nav className="sticky bottom-0 glass-card border-t border-border/50 px-4 py-2 pb-safe">
+      <nav className="sticky bottom-0 bg-card/95 backdrop-blur-md border-t border-border px-4 py-2 pb-safe">
         <div className="flex items-center justify-around max-w-lg mx-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
