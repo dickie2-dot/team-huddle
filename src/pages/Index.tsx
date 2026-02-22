@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,28 +19,12 @@ type TabId = (typeof tabs)[number]["id"];
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>("locker");
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!session) navigate("/auth", { replace: true });
-        else setLoading(false);
-      }
-    );
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) navigate("/auth", { replace: true });
-      else setLoading(false);
-    });
-    return () => subscription.unsubscribe();
-  }, [navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    navigate("/auth", { replace: true });
   };
-
-  if (loading) return null;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
