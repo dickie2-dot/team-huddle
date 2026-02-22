@@ -5,12 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import LockerRoom from "@/components/LockerRoom";
 import DraftDay from "@/components/DraftDay";
 import KitDuty from "@/components/KitDuty";
-import { Home, Shuffle, Shirt, LogOut } from "lucide-react";
+import SocialHub from "@/components/SocialHub";
+import { Home, Shuffle, Shirt, Users, LogOut } from "lucide-react";
 
 const tabs = [
   { id: "locker", label: "Locker Room", icon: Home },
   { id: "draft", label: "Draft", icon: Shuffle },
   { id: "kit", label: "Kit Duty", icon: Shirt },
+  { id: "social", label: "Social", icon: Users },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -74,6 +76,7 @@ const Index = () => {
             {activeTab === "locker" && <LockerRoom />}
             {activeTab === "draft" && <DraftDay />}
             {activeTab === "kit" && <KitDuty />}
+            {activeTab === "social" && <SocialHub />}
           </motion.div>
         </AnimatePresence>
       </main>
