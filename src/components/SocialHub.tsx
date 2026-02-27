@@ -29,12 +29,12 @@ const ACTIVITIES = [
 const SEGMENT_ANGLE = 360 / ACTIVITIES.length;
 
 const SEGMENT_COLORS = [
-  "hsl(150 80% 38%)",
-  "hsl(32 100% 55%)",
+  "hsl(150 75% 36%)",
+  "hsl(28 100% 52%)",
   "hsl(220 70% 50%)",
-  "hsl(0 84% 60%)",
+  "hsl(0 80% 58%)",
   "hsl(280 60% 50%)",
-  "hsl(150 80% 28%)",
+  "hsl(150 75% 26%)",
   "hsl(45 100% 50%)",
   "hsl(190 80% 42%)",
   "hsl(340 70% 50%)",
@@ -61,8 +61,8 @@ function drawWheel(canvas: HTMLCanvasElement) {
     ctx.closePath();
     ctx.fillStyle = SEGMENT_COLORS[i];
     ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.3)";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
     // Text
@@ -78,12 +78,12 @@ function drawWheel(canvas: HTMLCanvasElement) {
 
   // Center circle
   ctx.beginPath();
-  ctx.arc(cx, cy, 22, 0, Math.PI * 2);
-  ctx.fillStyle = "hsl(220, 25%, 10%)";
+  ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+  ctx.fillStyle = "hsl(220, 30%, 8%)";
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(cx, cy, 18, 0, Math.PI * 2);
-  ctx.fillStyle = "hsl(150 80% 38%)";
+  ctx.arc(cx, cy, 16, 0, Math.PI * 2);
+  ctx.fillStyle = "hsl(150 75% 36%)";
   ctx.fill();
 }
 
@@ -110,9 +110,8 @@ const SocialHub = () => {
     setShowPopup(false);
 
     const winnerIndex = Math.floor(Math.random() * ACTIVITIES.length);
-    // Land in the middle of the winning segment, pointer is at top (0°/360°)
     const targetAngle = 360 - (winnerIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2);
-    const fullSpins = 5 + Math.floor(Math.random() * 3); // 5-7 full spins
+    const fullSpins = 5 + Math.floor(Math.random() * 3);
     const totalRotation = rotation + fullSpins * 360 + targetAngle - (rotation % 360);
 
     setRotation(totalRotation);
@@ -131,45 +130,49 @@ const SocialHub = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* ── Team Kitty Card ── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         className="card-elevated p-5"
       >
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <Coins className="w-4 h-4 text-primary" />
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Coins className="w-4.5 h-4.5 text-primary" />
           </div>
           <h2 className="font-display font-bold text-foreground text-lg">
             Team Kitty
           </h2>
         </div>
 
-        <p className="text-4xl font-display font-extrabold text-foreground tracking-tight">
+        <p className="text-3xl font-display font-extrabold text-foreground tracking-tight tabular-nums">
           £{KITTY_BALANCE.toFixed(2)}
         </p>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-[10px] text-muted-foreground mt-1 font-medium">
           Last updated: {KITTY_UPDATED}
         </p>
 
-        <div className="mt-4 space-y-2">
+        <div className="mt-4 space-y-1">
           {TRANSACTIONS.map((tx, i) => (
             <div
               key={i}
-              className="flex items-center justify-between py-2 border-b border-border last:border-0"
+              className="flex items-center justify-between py-2.5 border-b border-border/50 last:border-0"
             >
               <div className="flex items-center gap-2">
                 {tx.type === "in" ? (
-                  <TrendingUp className="w-3.5 h-3.5 text-primary" />
+                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <TrendingUp className="w-3 h-3 text-primary" />
+                  </div>
                 ) : (
-                  <TrendingDown className="w-3.5 h-3.5 text-destructive" />
+                  <div className="w-6 h-6 rounded-lg bg-destructive/10 flex items-center justify-center">
+                    <TrendingDown className="w-3 h-3 text-destructive" />
+                  </div>
                 )}
-                <span className="text-sm text-foreground">{tx.label}</span>
+                <span className="text-sm font-medium text-foreground">{tx.label}</span>
               </div>
               <span
-                className={`text-sm font-semibold ${
+                className={`text-sm font-bold tabular-nums ${
                   tx.type === "in" ? "text-primary" : "text-destructive"
                 }`}
               >
@@ -187,15 +190,15 @@ const SocialHub = () => {
         transition={{ delay: 0.1 }}
         className="card-elevated p-5"
       >
-        <h2 className="font-display font-bold text-foreground text-lg mb-1">
+        <h2 className="font-display font-bold text-foreground text-lg mb-0.5">
           Activity Roulette
         </h2>
-        <p className="text-xs text-muted-foreground mb-5">
+        <p className="text-[10px] text-muted-foreground font-medium mb-5">
           Spin to decide your next social night!
         </p>
 
         {/* Wheel Container */}
-        <div className="relative flex items-center justify-center mx-auto" style={{ width: 280, height: 280 }}>
+        <div className="relative flex items-center justify-center mx-auto" style={{ width: 260, height: 260 }}>
           {/* Pointer */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
             <div
@@ -203,7 +206,7 @@ const SocialHub = () => {
               style={{
                 borderLeft: "10px solid transparent",
                 borderRight: "10px solid transparent",
-                borderTop: "18px solid hsl(220, 25%, 10%)",
+                borderTop: "16px solid hsl(220, 30%, 8%)",
               }}
             />
           </div>
@@ -219,9 +222,9 @@ const SocialHub = () => {
           >
             <canvas
               ref={canvasCallback}
-              width={280}
-              height={280}
-              className="w-full h-full rounded-full shadow-lg"
+              width={260}
+              height={260}
+              className="w-full h-full rounded-full shadow-md"
             />
           </motion.div>
         </div>
@@ -230,7 +233,7 @@ const SocialHub = () => {
         <motion.button
           onClick={spin}
           disabled={spinning}
-          className="w-full mt-5 py-3 rounded-xl font-display font-bold text-base bg-primary text-primary-foreground disabled:opacity-50 glow-primary"
+          className="w-full mt-5 py-3 rounded-xl font-display font-bold text-sm bg-primary text-primary-foreground disabled:opacity-50 glow-primary"
           whileTap={!spinning ? { scale: 0.96 } : undefined}
         >
           {spinning ? (
@@ -251,7 +254,7 @@ const SocialHub = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 backdrop-blur-sm px-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 backdrop-blur-sm px-6"
             onClick={() => setShowPopup(false)}
           >
             <motion.div
@@ -259,17 +262,17 @@ const SocialHub = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: "spring", damping: 20 }}
-              className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-xl text-center relative"
+              className="card-elevated p-6 w-full max-w-sm text-center relative"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={() => setShowPopup(false)}
-                className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+                className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
               <PartyPopper className="w-10 h-10 text-accent mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground mb-1">
+              <p className="text-xs text-muted-foreground mb-1 font-medium">
                 Pack your bags, we're going to…
               </p>
               <h3 className="text-2xl font-display font-extrabold text-foreground">

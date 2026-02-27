@@ -18,7 +18,6 @@ const DraftDay = () => {
     setHomeTeam([]);
     setAwayTeam([]);
 
-    // Rapid shuffle positions
     let count = 0;
     intervalRef.current = setInterval(() => {
       const positions: Record<number, { x: number; y: number }> = {};
@@ -32,7 +31,6 @@ const DraftDay = () => {
       count++;
       if (count > 15) {
         clearInterval(intervalRef.current);
-        // Split into teams
         const shuffled = [...confirmedPlayers].sort(() => Math.random() - 0.5);
         const half = Math.ceil(shuffled.length / 2);
         setHomeTeam(shuffled.slice(0, half));
@@ -56,25 +54,25 @@ const DraftDay = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-2"
+        className="text-center space-y-1"
       >
-        <h2 className="text-2xl font-display font-bold text-foreground">Draft Day</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-2xl font-display font-extrabold text-foreground">Draft Day</h2>
+        <p className="text-xs text-muted-foreground font-medium">
           {confirmedPlayers.length} players confirmed
         </p>
       </motion.div>
 
       {/* Shuffling zone */}
       {phase === "shuffling" && (
-        <div className="relative h-64 glass-card rounded-2xl overflow-hidden flex items-center justify-center">
+        <div className="relative h-64 card-elevated rounded-2xl overflow-hidden flex items-center justify-center">
           {confirmedPlayers.map((player) => (
             <motion.div
               key={player.id}
-              className="absolute w-10 h-10 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-xs font-bold text-primary"
+              className="absolute w-10 h-10 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary"
               animate={{
                 x: shufflePositions[player.id]?.x ?? 0,
                 y: shufflePositions[player.id]?.y ?? 0,
@@ -89,30 +87,30 @@ const DraftDay = () => {
 
       {/* Results */}
       {phase === "done" && (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2.5">
           {/* Home */}
           <motion.div
             initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 100 }}
-            className="glass-card rounded-2xl p-4 space-y-3"
+            className="card-elevated rounded-2xl p-4 space-y-3"
           >
             <div className="text-center">
               <span className="sport-badge">Home</span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {homeTeam.map((player, i) => (
                 <motion.div
                   key={player.id}
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1, type: "spring" }}
-                  className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50"
+                  className="flex items-center gap-2 p-2 rounded-xl bg-primary/5"
                 >
-                  <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary">
+                  <div className="w-7 h-7 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center text-[9px] font-bold text-primary">
                     {player.initials}
                   </div>
-                  <span className="text-sm font-medium text-foreground truncate">
+                  <span className="text-xs font-semibold text-foreground truncate">
                     {player.name}
                   </span>
                 </motion.div>
@@ -125,36 +123,26 @@ const DraftDay = () => {
             initial={{ x: 100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 100 }}
-            className="glass-card rounded-2xl p-4 space-y-3"
+            className="card-elevated rounded-2xl p-4 space-y-3"
           >
             <div className="text-center">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border"
-                style={{
-                  background: "linear-gradient(135deg, hsl(25 100% 55% / 0.15), hsl(25 100% 55% / 0.05))",
-                  color: "hsl(25 100% 55%)",
-                  borderColor: "hsl(25 100% 55% / 0.2)",
-                }}>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-accent/10 text-accent border-accent/20">
                 Away
               </span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {awayTeam.map((player, i) => (
                 <motion.div
                   key={player.id}
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1, type: "spring" }}
-                  className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50"
+                  className="flex items-center gap-2 p-2 rounded-xl bg-accent/5"
                 >
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border"
-                    style={{
-                      background: "hsl(25 100% 55% / 0.2)",
-                      borderColor: "hsl(25 100% 55% / 0.3)",
-                      color: "hsl(25 100% 55%)",
-                    }}>
+                  <div className="w-7 h-7 rounded-full bg-accent/15 border border-accent/25 flex items-center justify-center text-[9px] font-bold text-accent">
                     {player.initials}
                   </div>
-                  <span className="text-sm font-medium text-foreground truncate">
+                  <span className="text-xs font-semibold text-foreground truncate">
                     {player.name}
                   </span>
                 </motion.div>
@@ -169,10 +157,12 @@ const DraftDay = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="glass-card rounded-2xl p-8 text-center space-y-4"
+          className="card-elevated rounded-2xl p-10 text-center space-y-3"
         >
-          <Swords className="w-12 h-12 text-primary mx-auto" />
-          <p className="text-muted-foreground text-sm">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+            <Swords className="w-7 h-7 text-primary" />
+          </div>
+          <p className="text-muted-foreground text-sm font-medium">
             Split the squad into two balanced teams
           </p>
         </motion.div>
@@ -182,10 +172,10 @@ const DraftDay = () => {
       <motion.button
         onClick={phase === "done" ? reset : startDraft}
         disabled={phase === "shuffling"}
-        className={`w-full py-4 rounded-2xl font-display font-bold text-lg transition-all ${
+        className={`w-full py-3.5 rounded-2xl font-display font-bold text-base transition-all ${
           phase === "shuffling"
             ? "bg-secondary text-muted-foreground"
-            : "bg-primary text-primary-foreground"
+            : "bg-primary text-primary-foreground glow-primary"
         }`}
         whileHover={phase !== "shuffling" ? { scale: 1.02 } : {}}
         whileTap={phase !== "shuffling" ? { scale: 0.98 } : {}}
