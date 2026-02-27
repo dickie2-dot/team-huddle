@@ -25,14 +25,12 @@ const KitDuty = () => {
       iterations++;
 
       if (iterations >= totalIterations) {
-        // Land on winner
         setCurrentIndex(winnerIdx);
         setWinner(confirmedPlayers[winnerIdx]);
         setPhase("done");
         return;
       }
 
-      // Slow down
       speed = 60 + (iterations / totalIterations) * 300;
       intervalRef.current = setTimeout(tick, speed);
     };
@@ -50,19 +48,19 @@ const KitDuty = () => {
   const displayPlayer = confirmedPlayers[currentIndex];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-2"
+        className="text-center space-y-1"
       >
-        <h2 className="text-2xl font-display font-bold text-foreground">Kit Duty</h2>
-        <p className="text-sm text-muted-foreground">Someone's gotta wash the bibs...</p>
+        <h2 className="text-2xl font-display font-extrabold text-foreground">Kit Duty</h2>
+        <p className="text-xs text-muted-foreground font-medium">Someone's gotta wash the bibs...</p>
       </motion.div>
 
       {/* Roulette display */}
       <motion.div
-        className="glass-card rounded-2xl p-8 flex flex-col items-center justify-center min-h-[280px] space-y-6"
+        className="card-elevated rounded-2xl p-8 flex flex-col items-center justify-center min-h-[260px] space-y-5"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
       >
@@ -70,10 +68,12 @@ const KitDuty = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center space-y-4"
+            className="text-center space-y-3"
           >
-            <Shirt className="w-16 h-16 text-primary mx-auto" />
-            <p className="text-muted-foreground text-sm">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+              <Shirt className="w-8 h-8 text-primary" />
+            </div>
+            <p className="text-muted-foreground text-sm font-medium">
               Who's on kit duty this week?
             </p>
           </motion.div>
@@ -88,10 +88,10 @@ const KitDuty = () => {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -30, opacity: 0 }}
                 transition={{ duration: 0.08 }}
-                className={`w-24 h-24 rounded-full mx-auto flex items-center justify-center text-2xl font-bold font-display border-4 ${
+                className={`w-20 h-20 rounded-full mx-auto flex items-center justify-center text-xl font-bold font-display border-[3px] ${
                   phase === "done"
-                    ? "bg-accent/20 border-accent text-accent animate-flash"
-                    : "bg-primary/20 border-primary/40 text-primary"
+                    ? "bg-accent/15 border-accent text-accent animate-flash"
+                    : "bg-primary/15 border-primary/30 text-primary"
                 }`}
               >
                 {displayPlayer?.initials}
@@ -113,13 +113,8 @@ const KitDuty = () => {
                 transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
                 className="space-y-2"
               >
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider"
-                  style={{
-                    background: "linear-gradient(135deg, hsl(25 100% 55% / 0.2), hsl(25 100% 55% / 0.05))",
-                    color: "hsl(25 100% 55%)",
-                    border: "1px solid hsl(25 100% 55% / 0.3)",
-                  }}>
-                  <Trophy className="w-4 h-4" />
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-accent/10 text-accent border border-accent/20">
+                  <Trophy className="w-3.5 h-3.5" />
                   Kit Manager of the Week
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -135,10 +130,10 @@ const KitDuty = () => {
       <motion.button
         onClick={phase === "done" ? reset : spin}
         disabled={phase === "spinning"}
-        className={`w-full py-4 rounded-2xl font-display font-bold text-lg transition-all ${
+        className={`w-full py-3.5 rounded-2xl font-display font-bold text-base transition-all ${
           phase === "spinning"
             ? "bg-secondary text-muted-foreground"
-            : "bg-primary text-primary-foreground"
+            : "bg-primary text-primary-foreground glow-primary"
         }`}
         whileHover={phase !== "spinning" ? { scale: 1.02 } : {}}
         whileTap={phase !== "spinning" ? { scale: 0.98 } : {}}

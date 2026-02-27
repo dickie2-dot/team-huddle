@@ -6,12 +6,14 @@ import LockerRoom from "@/components/LockerRoom";
 import DraftDay from "@/components/DraftDay";
 import KitDuty from "@/components/KitDuty";
 import SocialHub from "@/components/SocialHub";
-import { Home, Shuffle, Shirt, Users, LogOut } from "lucide-react";
+import ChatPoll from "@/components/ChatPoll";
+import { Home, Shuffle, Shirt, Users, MessageCircle, LogOut, Settings } from "lucide-react";
 
 const tabs = [
-  { id: "locker", label: "Locker Room", icon: Home },
+  { id: "locker", label: "Home", icon: Home },
   { id: "draft", label: "Draft", icon: Shuffle },
   { id: "kit", label: "Kit Duty", icon: Shirt },
+  { id: "chat", label: "Chat", icon: MessageCircle },
   { id: "social", label: "Social", icon: Users },
 ] as const;
 
@@ -29,26 +31,36 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="px-4 pt-6 pb-2 flex items-center justify-between max-w-lg mx-auto w-full">
+      <header className="px-4 pt-5 pb-3 flex items-center justify-between max-w-lg mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-xl font-display font-bold text-foreground tracking-tight">
-            Thursday Night <span className="text-gradient-primary">Football</span>
+          <h1 className="text-lg font-display font-extrabold text-foreground tracking-tight leading-tight">
+            Thursday Night{" "}
+            <span className="text-gradient-primary">Football</span>
           </h1>
         </motion.div>
-        <motion.button
-          onClick={handleLogout}
-          className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          whileTap={{ scale: 0.9 }}
-        >
-          <LogOut className="w-5 h-5" />
-        </motion.button>
+        <div className="flex items-center gap-1">
+          <motion.button
+            onClick={() => navigate("/admin")}
+            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            whileTap={{ scale: 0.9 }}
+          >
+            <Settings className="w-5 h-5" />
+          </motion.button>
+          <motion.button
+            onClick={handleLogout}
+            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            whileTap={{ scale: 0.9 }}
+          >
+            <LogOut className="w-5 h-5" />
+          </motion.button>
+        </div>
       </header>
 
       {/* Content */}
-      <main className="flex-1 px-4 py-4 max-w-lg mx-auto w-full">
+      <main className="flex-1 px-4 py-3 max-w-lg mx-auto w-full overflow-y-auto">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -60,13 +72,14 @@ const Index = () => {
             {activeTab === "locker" && <LockerRoom />}
             {activeTab === "draft" && <DraftDay />}
             {activeTab === "kit" && <KitDuty />}
+            {activeTab === "chat" && <ChatPoll />}
             {activeTab === "social" && <SocialHub />}
           </motion.div>
         </AnimatePresence>
       </main>
 
       {/* Bottom Nav */}
-      <nav className="sticky bottom-0 bg-card/95 backdrop-blur-md border-t border-border px-4 py-2 pb-safe">
+      <nav className="sticky bottom-0 bg-card/95 backdrop-blur-md border-t border-border px-2 py-1.5 pb-safe">
         <div className="flex items-center justify-around max-w-lg mx-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -75,7 +88,7 @@ const Index = () => {
               <motion.button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-colors ${
+                className={`flex flex-col items-center gap-0.5 py-1.5 px-2.5 rounded-xl transition-colors ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
                 whileTap={{ scale: 0.9 }}
@@ -85,11 +98,11 @@ const Index = () => {
                   {isActive && (
                     <motion.div
                       layoutId="nav-dot"
-                      className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
                     />
                   )}
                 </div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider">
+                <span className="text-[9px] font-semibold uppercase tracking-wider">
                   {tab.label}
                 </span>
               </motion.button>

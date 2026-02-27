@@ -6,44 +6,44 @@
 
 @layer base {
   :root {
-    --background: 40 30% 97%;
-    --foreground: 220 25% 10%;
+    --background: 40 25% 97%;
+    --foreground: 220 30% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card-foreground: 220 30% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
+    --popover-foreground: 220 30% 8%;
 
-    --primary: 150 80% 38%;
+    --primary: 150 75% 36%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 93%;
-    --secondary-foreground: 220 25% 20%;
+    --secondary: 220 12% 93%;
+    --secondary-foreground: 220 25% 18%;
 
-    --muted: 220 10% 95%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 220 10% 94%;
+    --muted-foreground: 220 10% 42%;
 
-    --accent: 32 100% 55%;
+    --accent: 28 100% 52%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 80% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 90%;
-    --input: 220 15% 90%;
-    --ring: 150 80% 38%;
+    --border: 220 12% 91%;
+    --input: 220 12% 89%;
+    --ring: 150 75% 36%;
 
     --radius: 1rem;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 25% 10%;
-    --sidebar-primary: 150 80% 38%;
+    --sidebar-foreground: 220 30% 8%;
+    --sidebar-primary: 150 75% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 93%;
-    --sidebar-accent-foreground: 220 25% 20%;
-    --sidebar-border: 220 15% 90%;
-    --sidebar-ring: 150 80% 38%;
+    --sidebar-accent: 220 12% 93%;
+    --sidebar-accent-foreground: 220 25% 18%;
+    --sidebar-border: 220 12% 91%;
+    --sidebar-ring: 150 75% 36%;
   }
 }
 
@@ -65,35 +65,39 @@
 @layer utilities {
   .text-gradient-primary {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(150 80% 38%), hsl(150 80% 28%));
+    background-image: linear-gradient(135deg, hsl(150 75% 36%), hsl(160 85% 28%));
   }
 
   .text-gradient-warm {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(32 100% 55%), hsl(15 90% 50%));
+    background-image: linear-gradient(135deg, hsl(28 100% 52%), hsl(12 90% 48%));
   }
 
   .glow-primary {
-    box-shadow: 0 4px 20px hsl(150 80% 38% / 0.25);
+    box-shadow: 0 4px 24px hsl(150 75% 36% / 0.2), 0 1px 3px hsl(150 75% 36% / 0.1);
   }
 
   .glow-accent {
-    box-shadow: 0 4px 20px hsl(32 100% 55% / 0.25);
+    box-shadow: 0 4px 24px hsl(28 100% 52% / 0.2), 0 1px 3px hsl(28 100% 52% / 0.1);
   }
 
   .glass-card {
-    @apply bg-card border border-border shadow-sm;
+    @apply bg-card/90 backdrop-blur-sm border border-border/60 shadow-sm;
   }
 
   .sport-badge {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider;
-    background: hsl(150 80% 38% / 0.1);
-    color: hsl(150 80% 38%);
-    border: 1px solid hsl(150 80% 38% / 0.2);
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest;
+    background: hsl(150 75% 36% / 0.08);
+    color: hsl(150 75% 36%);
+    border: 1px solid hsl(150 75% 36% / 0.15);
   }
 
   .card-elevated {
-    @apply bg-card rounded-2xl border border-border;
-    box-shadow: 0 1px 3px hsl(220 25% 10% / 0.04), 0 6px 24px hsl(220 25% 10% / 0.06);
+    @apply bg-card rounded-2xl border border-border/60;
+    box-shadow: 0 1px 2px hsl(220 30% 8% / 0.03), 0 4px 16px hsl(220 30% 8% / 0.05);
+  }
+
+  .pb-safe {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
   }
 }
