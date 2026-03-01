@@ -15,6 +15,7 @@ import {
   Trash2,
   Loader2,
   StickyNote,
+  Repeat,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ interface MatchSettings {
   match_time: string;
   location: string;
   notes: string;
+  recurrence: string;
 }
 
 interface PlayerRow {
@@ -56,6 +58,7 @@ const Admin = () => {
     match_time: "",
     location: "",
     notes: "",
+    recurrence: "none",
   });
 
   // Roster
@@ -113,6 +116,7 @@ const Admin = () => {
         match_time: matchData.match_time,
         location: matchData.location,
         notes: matchData.notes || "",
+        recurrence: (matchData as any).recurrence || "none",
       });
     }
 
@@ -158,9 +162,10 @@ const Admin = () => {
           match_time: matchSettings.match_time,
           location: matchSettings.location,
           notes: matchSettings.notes,
+          recurrence: matchSettings.recurrence,
           updated_by: user?.id,
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq("id", matchSettings.id);
 
       if (error) {
@@ -174,8 +179,9 @@ const Admin = () => {
         match_time: matchSettings.match_time,
         location: matchSettings.location,
         notes: matchSettings.notes,
+        recurrence: matchSettings.recurrence,
         updated_by: user?.id,
-      });
+      } as any);
 
       if (error) {
         toast({ title: "Error saving", description: error.message, variant: "destructive" });
@@ -336,6 +342,35 @@ const Admin = () => {
                   placeholder="Bring shin pads, no excuses..."
                   className="rounded-xl min-h-[80px]"
                 />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                  <Repeat className="w-3.5 h-3.5" /> Recurrence
+                </label>
+                <div className="flex gap-2">
+                  {[
+                    { value: "none", label: "One-off" },
+                    { value: "weekly", label: "Weekly" },
+                    { value: "biweekly", label: "Biweekly" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setMatchSettings({ ...matchSettings, recurrence: opt.value })}
+                      className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${
+                        matchSettings.recurrence === opt.value
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                {matchSettings.recurrence !== "none" && (
+                  <p className="text-[10px] text-muted-foreground mt-1.5">
+                    After the match date, the next match will auto-schedule {matchSettings.recurrence === "weekly" ? "7" : "14"} days later with the same time & location.
+                  </p>
+                )}
               </div>
             </div>
 
