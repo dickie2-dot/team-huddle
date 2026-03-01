@@ -22,6 +22,7 @@ export type Database = {
           match_date: string
           match_time: string
           notes: string | null
+          recurrence: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -32,6 +33,7 @@ export type Database = {
           match_date: string
           match_time: string
           notes?: string | null
+          recurrence?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -42,6 +44,7 @@ export type Database = {
           match_date?: string
           match_time?: string
           notes?: string | null
+          recurrence?: string | null
           updated_at?: string
           updated_by?: string | null
         }
