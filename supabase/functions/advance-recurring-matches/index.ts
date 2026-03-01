@@ -15,13 +15,11 @@ Deno.serve(async (req) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-  // Find match settings where the match date has passed and recurrence is set
-  const today = new Date().toISOString().split("T")[0];
+  const now = new Date();
 
   const { data: matches, error } = await supabase
     .from("match_settings")
-    .select("*")
-    .lt("match_date", today)
+    .select("id, match_date, match_time, recurrence")
     .neq("recurrence", "none");
 
   if (error) {
@@ -35,17 +33,22 @@ Deno.serve(async (req) => {
 
   for (const match of matches || []) {
     const daysToAdd = match.recurrence === "weekly" ? 7 : 14;
-    const oldDate = new Date(match.match_date);
-    
-    // Keep advancing until the date is in the future
-    let nextDate = new Date(oldDate);
-    while (nextDate.toISOString().split("T")[0] < today) {
-      nextDate.setDate(nextDate.getDate() + daysToAdd);
+    const occurrence = new Date(`${match.match_date}T${match.match_time}`);
+
+    if (Number.isNaN(occurrence.getTime())) continue;
+
+    let nextOccurrence = new Date(occurrence);
+
+    // If event time has already passed, keep advancing until future.
+    while (nextOccurrence <= now) {
+      nextOccurrence.setDate(nextOccurrence.getDate() + daysToAdd);
     }
 
-    const nextDateStr = nextDate.toISOString().split("T")[0];
+    const hasChanged = nextOccurrence.toISOString().split("T")[0] !== match.match_date;
+    if (!hasChanged) continue;
 
-    // Update the match date to the next occurrence
+    const nextDateStr = nextOccurrence.toISOString().split("T")[0];
+
     await supabase
       .from("match_settings")
       .update({
