@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { MapPin, Clock, Users, Zap, Check, Loader2, StickyNote } from "lucide-react";
 import { format, parseISO } from "date-fns";
@@ -30,12 +30,7 @@ const LockerRoom = () => {
   const confirmedCount = activePlayers.length;
   const progress = totalSpots > 0 ? (confirmedCount / totalSpots) * 100 : 0;
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = useCallback(async () => {
     const [matchRes, playersRes] = await Promise.all([
       supabase
         .from("match_settings")
@@ -43,13 +38,47 @@ const LockerRoom = () => {
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
-      supabase.from("players").select("*").order("name"),
+      supabase.from("players").select("id, name, position, is_active").order("name"),
     ]);
 
-    if (matchRes.data) setMatchSettings(matchRes.data);
-    if (playersRes.data) setPlayers(playersRes.data);
-    setLoading(false);
-  };
+    setMatchSettings(matchRes.data ?? null);
+    setPlayers(playersRes.data ?? []);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const initialize = async () => {
+      setLoading(true);
+      await loadData();
+      if (isMounted) setLoading(false);
+    };
+
+    initialize();
+
+    const channel = supabase
+      .channel("locker-room-sync")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "match_settings" },
+        () => {
+          void loadData();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "players" },
+        () => {
+          void loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [loadData]);
 
   const formatDate = (dateStr: string) => {
     try {
@@ -217,3 +246,4 @@ const LockerRoom = () => {
 };
 
 export default LockerRoom;
+

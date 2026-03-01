@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Coins, TrendingUp, TrendingDown, RotateCw, PartyPopper, X } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -65,7 +65,6 @@ function drawWheel(canvas: HTMLCanvasElement) {
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Text
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(startAngle + (endAngle - startAngle) / 2);
@@ -76,7 +75,6 @@ function drawWheel(canvas: HTMLCanvasElement) {
     ctx.restore();
   });
 
-  // Center circle
   ctx.beginPath();
   ctx.arc(cx, cy, 20, 0, Math.PI * 2);
   ctx.fillStyle = "hsl(220, 30%, 8%)";
@@ -141,17 +139,13 @@ const SocialHub = () => {
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
             <Coins className="w-4.5 h-4.5 text-primary" />
           </div>
-          <h2 className="font-display font-bold text-foreground text-lg">
-            Team Kitty
-          </h2>
+          <h2 className="font-display font-bold text-foreground text-lg">Team Kitty</h2>
         </div>
 
         <p className="text-3xl font-display font-extrabold text-foreground tracking-tight tabular-nums">
           £{KITTY_BALANCE.toFixed(2)}
         </p>
-        <p className="text-[10px] text-muted-foreground mt-1 font-medium">
-          Last updated: {KITTY_UPDATED}
-        </p>
+        <p className="text-[10px] text-muted-foreground mt-1 font-medium">Last updated: {KITTY_UPDATED}</p>
 
         <div className="mt-4 space-y-1">
           {TRANSACTIONS.map((tx, i) => (
@@ -190,16 +184,12 @@ const SocialHub = () => {
         transition={{ delay: 0.1 }}
         className="card-elevated p-5"
       >
-        <h2 className="font-display font-bold text-foreground text-lg mb-0.5">
-          Activity Roulette
-        </h2>
+        <h2 className="font-display font-bold text-foreground text-lg mb-0.5">Activity Roulette</h2>
         <p className="text-[10px] text-muted-foreground font-medium mb-5">
           Spin to decide your next social night!
         </p>
 
-        {/* Wheel Container */}
         <div className="relative flex items-center justify-center mx-auto" style={{ width: 260, height: 260 }}>
-          {/* Pointer */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
             <div
               className="w-0 h-0"
@@ -211,7 +201,6 @@ const SocialHub = () => {
             />
           </div>
 
-          {/* Spinning Wheel */}
           <motion.div
             animate={{ rotate: rotation }}
             transition={{
@@ -220,16 +209,10 @@ const SocialHub = () => {
             }}
             className="w-full h-full"
           >
-            <canvas
-              ref={canvasCallback}
-              width={260}
-              height={260}
-              className="w-full h-full rounded-full shadow-md"
-            />
+            <canvas ref={canvasCallback} width={260} height={260} className="w-full h-full rounded-full shadow-md" />
           </motion.div>
         </div>
 
-        {/* Spin Button */}
         <motion.button
           onClick={spin}
           disabled={spinning}
@@ -247,46 +230,36 @@ const SocialHub = () => {
         </motion.button>
       </motion.div>
 
-      {/* ── Result Popup ── */}
-      <AnimatePresence>
-        {showPopup && result && (
+      {showPopup && result && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 backdrop-blur-sm px-6"
+          onClick={() => setShowPopup(false)}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 backdrop-blur-sm px-6"
-            onClick={() => setShowPopup(false)}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", damping: 20 }}
+            className="card-elevated p-6 w-full max-w-sm text-center relative"
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: "spring", damping: 20 }}
-              className="card-elevated p-6 w-full max-w-sm text-center relative"
-              onClick={(e) => e.stopPropagation()}
+            <button
+              onClick={() => setShowPopup(false)}
+              className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
             >
-              <button
-                onClick={() => setShowPopup(false)}
-                className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <PartyPopper className="w-10 h-10 text-accent mx-auto mb-3" />
-              <p className="text-xs text-muted-foreground mb-1 font-medium">
-                Pack your bags, we're going to…
-              </p>
-              <h3 className="text-2xl font-display font-extrabold text-foreground">
-                {result.name}
-              </h3>
-              <span className="sport-badge mt-3 inline-block">
-                {result.tagline}
-              </span>
-            </motion.div>
+              <X className="w-5 h-5" />
+            </button>
+            <PartyPopper className="w-10 h-10 text-accent mx-auto mb-3" />
+            <p className="text-xs text-muted-foreground mb-1 font-medium">Pack your bags, we're going to…</p>
+            <h3 className="text-2xl font-display font-extrabold text-foreground">{result.name}</h3>
+            <span className="sport-badge mt-3 inline-block">{result.tagline}</span>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
     </div>
   );
 };
 
 export default SocialHub;
+

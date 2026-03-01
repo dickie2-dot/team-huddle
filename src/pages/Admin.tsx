@@ -68,21 +68,24 @@ const Admin = () => {
 
   // Admin roles
   const [admins, setAdmins] = useState<RoleRow[]>([]);
-  const [newAdminEmail, setNewAdminEmail] = useState("");
 
   useEffect(() => {
     checkAdminAndLoad();
   }, []);
 
   const checkAdminAndLoad = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
-      // For testing without auth, allow access
-      setIsAdmin(true);
-      await loadData();
+      setIsAdmin(false);
       setLoading(false);
+      navigate("/auth", { replace: true });
       return;
     }
+
+    await supabase.rpc("ensure_first_admin");
 
     const { data: roleData } = await supabase
       .from("user_roles")
@@ -134,8 +137,7 @@ const Admin = () => {
       .select("id, user_id, role")
       .eq("role", "admin");
 
-    if (adminData) {
-      // Get display names for admins
+    if (adminData && adminData.length > 0) {
       const userIds = adminData.map((a) => a.user_id);
       const { data: profiles } = await supabase
         .from("profiles")
@@ -147,13 +149,27 @@ const Admin = () => {
         profile: profiles?.find((p) => p.user_id === a.user_id),
       }));
       setAdmins(enriched);
+    } else {
+      setAdmins([]);
     }
   };
 
   const saveMatchSettings = async () => {
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
+    if (!user) {
+      setSaving(false);
+      toast({
+        title: "Sign in required",
+        description: "Please sign in again to save settings.",
+        variant: "destructive",
+      });
+      navigate("/auth", { replace: true });
+      return;
+    }
     if (matchSettings.id) {
       const { error } = await supabase
         .from("match_settings")
