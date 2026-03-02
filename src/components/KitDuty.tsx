@@ -1,31 +1,17 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shirt, Trophy, RotateCcw, Loader2 } from "lucide-react";
-import { useActivePlayers, type ActivePlayer } from "@/hooks/use-active-players";
+import { MOCK_PLAYERS } from "@/data/players";
+import { Shirt, Trophy, RotateCcw } from "lucide-react";
 
 const KitDuty = () => {
-  const { players: confirmedPlayers, loading } = useActivePlayers();
+  const confirmedPlayers = MOCK_PLAYERS.filter((p) => p.confirmed);
   const [phase, setPhase] = useState<"idle" | "spinning" | "done">("idle");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [winner, setWinner] = useState<ActivePlayer | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    if (confirmedPlayers.length === 0) {
-      setCurrentIndex(0);
-      setWinner(null);
-      setPhase("idle");
-      return;
-    }
-
-    if (currentIndex >= confirmedPlayers.length) {
-      setCurrentIndex(0);
-    }
-  }, [confirmedPlayers, currentIndex]);
+  const [winner, setWinner] = useState<typeof confirmedPlayers[0] | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   const spin = useCallback(() => {
-    if (phase !== "idle" || confirmedPlayers.length === 0) return;
-
+    if (phase !== "idle") return;
     setPhase("spinning");
     setWinner(null);
 
@@ -59,14 +45,7 @@ const KitDuty = () => {
     if (intervalRef.current) clearTimeout(intervalRef.current);
   };
 
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearTimeout(intervalRef.current);
-    };
-  }, []);
-
-  const displayPlayer = confirmedPlayers[currentIndex] ?? null;
-  const canSpin = confirmedPlayers.length > 0;
+  const displayPlayer = confirmedPlayers[currentIndex];
 
   return (
     <div className="space-y-5">
@@ -76,27 +55,26 @@ const KitDuty = () => {
         className="text-center space-y-1"
       >
         <h2 className="text-2xl font-display font-extrabold text-foreground">Kit Duty</h2>
-        {loading ? (
-          <p className="text-xs text-muted-foreground font-medium inline-flex items-center gap-1.5">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading players...
-          </p>
-        ) : (
-          <p className="text-xs text-muted-foreground font-medium">Draw from active Admin roster players</p>
-        )}
+        <p className="text-xs text-muted-foreground font-medium">Someone's gotta wash the bibs...</p>
       </motion.div>
 
+      {/* Roulette display */}
       <motion.div
         className="card-elevated rounded-2xl p-8 flex flex-col items-center justify-center min-h-[260px] space-y-5"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
       >
         {phase === "idle" && !winner && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-3">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center space-y-3"
+          >
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
               <Shirt className="w-8 h-8 text-primary" />
             </div>
             <p className="text-muted-foreground text-sm font-medium">
-              {canSpin ? "Who's on kit duty this week?" : "Add active players in Admin to run kit duty"}
+              Who's on kit duty this week?
             </p>
           </motion.div>
         )}
@@ -116,12 +94,7 @@ const KitDuty = () => {
                     : "bg-primary/15 border-primary/30 text-primary"
                 }`}
               >
-                {displayPlayer?.name
-                  ?.split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase() || "?"}
+                {displayPlayer?.initials}
               </motion.div>
             </AnimatePresence>
 
@@ -130,7 +103,7 @@ const KitDuty = () => {
               animate={phase === "spinning" ? { opacity: [0.5, 1] } : {}}
               transition={{ repeat: Infinity, duration: 0.3 }}
             >
-              {displayPlayer?.name || "No Player"}
+              {displayPlayer?.name}
             </motion.p>
 
             {phase === "done" && winner && (
@@ -144,23 +117,26 @@ const KitDuty = () => {
                   <Trophy className="w-3.5 h-3.5" />
                   Kit Manager of the Week
                 </div>
-                <p className="text-xs text-muted-foreground">Better luck next time, {winner.name} 😅</p>
+                <p className="text-xs text-muted-foreground">
+                  Better luck next time, {winner.name} 😅
+                </p>
               </motion.div>
             )}
           </div>
         )}
       </motion.div>
 
+      {/* Action button */}
       <motion.button
         onClick={phase === "done" ? reset : spin}
-        disabled={phase === "spinning" || loading || !canSpin}
+        disabled={phase === "spinning"}
         className={`w-full py-3.5 rounded-2xl font-display font-bold text-base transition-all ${
-          phase === "spinning" || loading || !canSpin
+          phase === "spinning"
             ? "bg-secondary text-muted-foreground"
             : "bg-primary text-primary-foreground glow-primary"
         }`}
-        whileHover={phase !== "spinning" && !loading && canSpin ? { scale: 1.02 } : {}}
-        whileTap={phase !== "spinning" && !loading && canSpin ? { scale: 0.98 } : {}}
+        whileHover={phase !== "spinning" ? { scale: 1.02 } : {}}
+        whileTap={phase !== "spinning" ? { scale: 0.98 } : {}}
       >
         <span className="flex items-center justify-center gap-2">
           {phase === "done" ? (
@@ -169,10 +145,6 @@ const KitDuty = () => {
             </>
           ) : phase === "spinning" ? (
             "Drawing..."
-          ) : loading ? (
-            "Loading roster..."
-          ) : !canSpin ? (
-            "No Active Players"
           ) : (
             <>
               <Shirt className="w-5 h-5" /> Draw Kit Manager
@@ -185,4 +157,3 @@ const KitDuty = () => {
 };
 
 export default KitDuty;
-

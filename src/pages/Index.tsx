@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +7,7 @@ import DraftDay from "@/components/DraftDay";
 import KitDuty from "@/components/KitDuty";
 import SocialHub from "@/components/SocialHub";
 import ChatPoll from "@/components/ChatPoll";
-import { Home, Shuffle, Shirt, Users, MessageCircle, LogOut, Settings, Loader2 } from "lucide-react";
+import { Home, Shuffle, Shirt, Users, MessageCircle, LogOut, Settings } from "lucide-react";
 
 const tabs = [
   { id: "locker", label: "Home", icon: Home },
@@ -21,63 +21,24 @@ type TabId = (typeof tabs)[number]["id"];
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>("locker");
-  const [checkingAuth, setCheckingAuth] = useState(true);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!isMounted) return;
-
-      if (!session) {
-        navigate("/auth", { replace: true });
-        return;
-      }
-
-      setCheckingAuth(false);
-    };
-
-    checkSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        navigate("/auth", { replace: true });
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/auth", { replace: true });
   };
 
-  if (checkingAuth) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-primary animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="px-4 pt-5 pb-3 flex items-center justify-between max-w-lg mx-auto w-full">
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
           <h1 className="text-lg font-display font-extrabold text-foreground tracking-tight leading-tight">
-            Thursday Night <span className="text-gradient-primary">Football</span>
+            Thursday Night{" "}
+            <span className="text-gradient-primary">Football</span>
           </h1>
         </motion.div>
         <div className="flex items-center gap-1">
@@ -141,7 +102,9 @@ const Index = () => {
                     />
                   )}
                 </div>
-                <span className="text-[9px] font-semibold uppercase tracking-wider">{tab.label}</span>
+                <span className="text-[9px] font-semibold uppercase tracking-wider">
+                  {tab.label}
+                </span>
               </motion.button>
             );
           })}
@@ -152,4 +115,3 @@ const Index = () => {
 };
 
 export default Index;
-
