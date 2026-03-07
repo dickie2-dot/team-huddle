@@ -7,12 +7,12 @@ import DraftDay from "@/components/DraftDay";
 import KitDuty from "@/components/KitDuty";
 import SocialHub from "@/components/SocialHub";
 import ChatPoll from "@/components/ChatPoll";
-import { Home, Shuffle, Shirt, Users, MessageCircle, LogOut, Settings } from "lucide-react";
+import { Home, Shuffle, Shirt, Users, MessageCircle, Settings, User } from "lucide-react";
 
 const tabs = [
   { id: "locker", label: "Home", icon: Home },
   { id: "draft", label: "Draft", icon: Shuffle },
-  { id: "kit", label: "Kit Duty", icon: Shirt },
+  { id: "kit", label: "Bibs", icon: Shirt },
   { id: "chat", label: "Chat", icon: MessageCircle },
   { id: "social", label: "Social", icon: Users },
 ] as const;
@@ -23,11 +23,6 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>("locker");
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth", { replace: true });
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -37,24 +32,24 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="text-lg font-display font-extrabold text-foreground tracking-tight leading-tight">
-            Thursday Night{" "}
-            <span className="text-gradient-primary">Football</span>
+            Team{" "}
+            <span className="text-gradient-primary">Huddle</span>
           </h1>
         </motion.div>
         <div className="flex items-center gap-1">
+          <motion.button
+            onClick={() => navigate("/profile")}
+            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            whileTap={{ scale: 0.9 }}
+          >
+            <User className="w-5 h-5" />
+          </motion.button>
           <motion.button
             onClick={() => navigate("/admin")}
             className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             whileTap={{ scale: 0.9 }}
           >
             <Settings className="w-5 h-5" />
-          </motion.button>
-          <motion.button
-            onClick={handleLogout}
-            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            whileTap={{ scale: 0.9 }}
-          >
-            <LogOut className="w-5 h-5" />
           </motion.button>
         </div>
       </header>
