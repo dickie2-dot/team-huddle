@@ -1,15 +1,26 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, TrendingUp, TrendingDown, RotateCw, PartyPopper, X } from "lucide-react";
+import { Coins, TrendingUp, TrendingDown, RotateCw, PartyPopper, X, Users } from "lucide-react";
 import confetti from "canvas-confetti";
 
-/* ── Kitty Data ── */
+/* ── Kitty Data (placeholder) ── */
 const KITTY_BALANCE = 245.5;
 const KITTY_UPDATED = "Today, 6:32 PM";
+
 const TRANSACTIONS = [
   { label: "Match Fees", amount: 70, type: "in" as const },
   { label: "New Bibs", amount: 45, type: "out" as const },
   { label: "Pitch Booking", amount: 30, type: "out" as const },
+];
+
+const PLAYER_CONTRIBUTIONS = [
+  { name: "Marcus Reid", amount: 12 },
+  { name: "Jake Thornton", amount: 12 },
+  { name: "Leo Vasquez", amount: 6 },
+  { name: "Sam Okafor", amount: 12 },
+  { name: "Dan Mitchell", amount: 6 },
+  { name: "Kai Brennan", amount: 12 },
+  { name: "Ryan Choi", amount: 6 },
 ];
 
 /* ── Wheel Data ── */
@@ -65,7 +76,6 @@ function drawWheel(canvas: HTMLCanvasElement) {
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Text
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(startAngle + (endAngle - startAngle) / 2);
@@ -76,7 +86,6 @@ function drawWheel(canvas: HTMLCanvasElement) {
     ctx.restore();
   });
 
-  // Center circle
   ctx.beginPath();
   ctx.arc(cx, cy, 20, 0, Math.PI * 2);
   ctx.fillStyle = "hsl(220, 30%, 8%)";
@@ -92,6 +101,7 @@ const SocialHub = () => {
   const [result, setResult] = useState<(typeof ACTIVITIES)[number] | null>(null);
   const [rotation, setRotation] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
+  const [showContributions, setShowContributions] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wheelDrawn = useRef(false);
 
@@ -137,13 +147,21 @@ const SocialHub = () => {
         animate={{ opacity: 1, y: 0 }}
         className="card-elevated p-5"
       >
-        <div className="flex items-center gap-2.5 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Coins className="w-4.5 h-4.5 text-primary" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Coins className="w-4.5 h-4.5 text-primary" />
+            </div>
+            <h2 className="font-display font-bold text-foreground text-lg">
+              Team Kitty
+            </h2>
           </div>
-          <h2 className="font-display font-bold text-foreground text-lg">
-            Team Kitty
-          </h2>
+          <button
+            onClick={() => setShowContributions(!showContributions)}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <Users className="w-4 h-4" />
+          </button>
         </div>
 
         <p className="text-3xl font-display font-extrabold text-foreground tracking-tight tabular-nums">
@@ -152,6 +170,34 @@ const SocialHub = () => {
         <p className="text-[10px] text-muted-foreground mt-1 font-medium">
           Last updated: {KITTY_UPDATED}
         </p>
+
+        {/* Player Contributions */}
+        <AnimatePresence>
+          {showContributions && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-4 pt-3 border-t border-border/50">
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">
+                  Contributions
+                </h4>
+                <div className="space-y-1">
+                  {PLAYER_CONTRIBUTIONS.map((pc, i) => (
+                    <div key={i} className="flex items-center justify-between py-1.5">
+                      <span className="text-xs font-medium text-foreground">{pc.name}</span>
+                      <span className="text-xs font-bold text-primary tabular-nums">
+                        £{pc.amount.toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="mt-4 space-y-1">
           {TRANSACTIONS.map((tx, i) => (
@@ -197,9 +243,7 @@ const SocialHub = () => {
           Spin to decide your next social night!
         </p>
 
-        {/* Wheel Container */}
         <div className="relative flex items-center justify-center mx-auto" style={{ width: 260, height: 260 }}>
-          {/* Pointer */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
             <div
               className="w-0 h-0"
@@ -211,13 +255,9 @@ const SocialHub = () => {
             />
           </div>
 
-          {/* Spinning Wheel */}
           <motion.div
             animate={{ rotate: rotation }}
-            transition={{
-              duration: 4,
-              ease: [0.17, 0.67, 0.16, 0.99],
-            }}
+            transition={{ duration: 4, ease: [0.17, 0.67, 0.16, 0.99] }}
             className="w-full h-full"
           >
             <canvas
@@ -229,7 +269,6 @@ const SocialHub = () => {
           </motion.div>
         </div>
 
-        {/* Spin Button */}
         <motion.button
           onClick={spin}
           disabled={spinning}
@@ -247,7 +286,7 @@ const SocialHub = () => {
         </motion.button>
       </motion.div>
 
-      {/* ── Result Popup ── */}
+      {/* Result Popup */}
       <AnimatePresence>
         {showPopup && result && (
           <motion.div

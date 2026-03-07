@@ -1,27 +1,67 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MOCK_PLAYERS, Player } from "@/data/players";
+import { supabase } from "@/integrations/supabase/client";
 import { Shuffle, Swords } from "lucide-react";
+
+interface DraftPlayer {
+  id: string;
+  name: string;
+  initials: string;
+  avatar?: string;
+}
 
 const DraftDay = () => {
   const [phase, setPhase] = useState<"idle" | "shuffling" | "done">("idle");
-  const [homeTeam, setHomeTeam] = useState<Player[]>([]);
-  const [awayTeam, setAwayTeam] = useState<Player[]>([]);
-  const [shufflePositions, setShufflePositions] = useState<Record<number, { x: number; y: number }>>({});
+  const [homeTeam, setHomeTeam] = useState<DraftPlayer[]>([]);
+  const [awayTeam, setAwayTeam] = useState<DraftPlayer[]>([]);
+  const [players, setPlayers] = useState<DraftPlayer[]>([]);
+  const [shufflePositions, setShufflePositions] = useState<Record<string, { x: number; y: number }>>({});
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
-  const confirmedPlayers = MOCK_PLAYERS.filter((p) => p.confirmed);
+  useEffect(() => {
+    loadPlayers();
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  const loadPlayers = async () => {
+    const { data } = await supabase
+      .from("players")
+      .select("*")
+      .eq("is_active", true)
+      .order("name");
+
+    if (data && data.length > 0) {
+      setPlayers(
+        data.map((p) => ({
+          id: p.id,
+          name: p.name,
+          initials: p.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase(),
+        }))
+      );
+    } else {
+      // Fallback
+      const names = ["Marcus Reid", "Jake Thornton", "Leo Vasquez", "Sam Okafor", "Dan Mitchell",
+        "Kai Brennan", "Tom Ashford", "Ryan Choi", "Finn Gallagher", "Nate Pearson"];
+      setPlayers(names.map((n, i) => ({
+        id: String(i + 1),
+        name: n,
+        initials: n.split(" ").map((w) => w[0]).join(""),
+      })));
+    }
+  };
 
   const startDraft = useCallback(() => {
-    if (phase !== "idle") return;
+    if (phase !== "idle" || players.length === 0) return;
     setPhase("shuffling");
     setHomeTeam([]);
     setAwayTeam([]);
 
     let count = 0;
     intervalRef.current = setInterval(() => {
-      const positions: Record<number, { x: number; y: number }> = {};
-      confirmedPlayers.forEach((p) => {
+      const positions: Record<string, { x: number; y: number }> = {};
+      players.forEach((p) => {
         positions[p.id] = {
           x: (Math.random() - 0.5) * 200,
           y: (Math.random() - 0.5) * 200,
@@ -31,7 +71,7 @@ const DraftDay = () => {
       count++;
       if (count > 15) {
         clearInterval(intervalRef.current);
-        const shuffled = [...confirmedPlayers].sort(() => Math.random() - 0.5);
+        const shuffled = [...players].sort(() => Math.random() - 0.5);
         const half = Math.ceil(shuffled.length / 2);
         setHomeTeam(shuffled.slice(0, half));
         setAwayTeam(shuffled.slice(half));
@@ -39,19 +79,68 @@ const DraftDay = () => {
         setPhase("done");
       }
     }, 120);
-  }, [phase, confirmedPlayers]);
-
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
+  }, [phase, players]);
 
   const reset = () => {
     setPhase("idle");
     setHomeTeam([]);
     setAwayTeam([]);
   };
+
+  const TeamColumn = ({
+    team,
+    label,
+    isHome,
+  }: {
+    team: DraftPlayer[];
+    label: string;
+    isHome: boolean;
+  }) => (
+    <motion.div
+      initial={{ x: isHome ? -100 : 100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 100 }}
+      className="card-elevated rounded-2xl p-4 space-y-3"
+    >
+      <div className="text-center">
+        <span
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+            isHome
+              ? "bg-primary/8 text-primary border-primary/20"
+              : "bg-accent/10 text-accent border-accent/20"
+          }`}
+        >
+          {label}
+        </span>
+      </div>
+      <div className="space-y-1.5">
+        {team.map((player, i) => (
+          <motion.div
+            key={player.id}
+            initial={{ opacity: 0, x: isHome ? -30 : 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.1, type: "spring" }}
+            className={`flex items-center gap-2 p-2 rounded-xl ${
+              isHome ? "bg-primary/5" : "bg-accent/5"
+            }`}
+          >
+            <div
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold border ${
+                isHome
+                  ? "bg-primary/15 border-primary/25 text-primary"
+                  : "bg-accent/15 border-accent/25 text-accent"
+              }`}
+            >
+              {player.initials}
+            </div>
+            <span className="text-xs font-semibold text-foreground truncate">
+              {player.name}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  );
 
   return (
     <div className="space-y-5">
@@ -62,14 +151,14 @@ const DraftDay = () => {
       >
         <h2 className="text-2xl font-display font-extrabold text-foreground">Draft Day</h2>
         <p className="text-xs text-muted-foreground font-medium">
-          {confirmedPlayers.length} players confirmed
+          {players.length} players in the pool
         </p>
       </motion.div>
 
-      {/* Shuffling zone */}
+      {/* Shuffling animation */}
       {phase === "shuffling" && (
         <div className="relative h-64 card-elevated rounded-2xl overflow-hidden flex items-center justify-center">
-          {confirmedPlayers.map((player) => (
+          {players.map((player) => (
             <motion.div
               key={player.id}
               className="absolute w-10 h-10 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary"
@@ -85,74 +174,15 @@ const DraftDay = () => {
         </div>
       )}
 
-      {/* Results */}
+      {/* Draft results: Home & Away columns */}
       {phase === "done" && (
         <div className="grid grid-cols-2 gap-2.5">
-          {/* Home */}
-          <motion.div
-            initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 100 }}
-            className="card-elevated rounded-2xl p-4 space-y-3"
-          >
-            <div className="text-center">
-              <span className="sport-badge">Home</span>
-            </div>
-            <div className="space-y-1.5">
-              {homeTeam.map((player, i) => (
-                <motion.div
-                  key={player.id}
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1, type: "spring" }}
-                  className="flex items-center gap-2 p-2 rounded-xl bg-primary/5"
-                >
-                  <div className="w-7 h-7 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center text-[9px] font-bold text-primary">
-                    {player.initials}
-                  </div>
-                  <span className="text-xs font-semibold text-foreground truncate">
-                    {player.name}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Away */}
-          <motion.div
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 100 }}
-            className="card-elevated rounded-2xl p-4 space-y-3"
-          >
-            <div className="text-center">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-accent/10 text-accent border-accent/20">
-                Away
-              </span>
-            </div>
-            <div className="space-y-1.5">
-              {awayTeam.map((player, i) => (
-                <motion.div
-                  key={player.id}
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1, type: "spring" }}
-                  className="flex items-center gap-2 p-2 rounded-xl bg-accent/5"
-                >
-                  <div className="w-7 h-7 rounded-full bg-accent/15 border border-accent/25 flex items-center justify-center text-[9px] font-bold text-accent">
-                    {player.initials}
-                  </div>
-                  <span className="text-xs font-semibold text-foreground truncate">
-                    {player.name}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+          <TeamColumn team={homeTeam} label="Home" isHome />
+          <TeamColumn team={awayTeam} label="Away" isHome={false} />
         </div>
       )}
 
-      {/* Idle state */}
+      {/* Idle */}
       {phase === "idle" && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -168,7 +198,7 @@ const DraftDay = () => {
         </motion.div>
       )}
 
-      {/* Action Button */}
+      {/* Action */}
       <motion.button
         onClick={phase === "done" ? reset : startDraft}
         disabled={phase === "shuffling"}
