@@ -284,6 +284,7 @@ const Admin = () => {
 
   const sections = [
     { id: "matches" as const, label: "Matches", icon: Calendar },
+    { id: "auto-captain" as const, label: "Auto", icon: Bot },
     { id: "roster" as const, label: "Roster", icon: Users },
     { id: "settings" as const, label: "Club", icon: Settings },
     { id: "admins" as const, label: "Admins", icon: Shield },
