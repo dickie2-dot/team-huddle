@@ -40,6 +40,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import AutoCaptain from "@/components/AutoCaptain";
 
 interface MatchSettings {
   id?: string;
