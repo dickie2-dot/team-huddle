@@ -70,6 +70,8 @@ export interface DummyKittyTransaction {
   amount: number;
   type: "in" | "out";
   date: string;
+  source?: "fine" | "voluntary" | "match_fee" | "expense";
+  player_name?: string;
 }
 
 export interface DummyBibHistory {
