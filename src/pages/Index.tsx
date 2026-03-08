@@ -7,6 +7,7 @@ import DraftDay from "@/components/DraftDay";
 import KitDuty from "@/components/KitDuty";
 import SocialHub from "@/components/SocialHub";
 import ChatPoll from "@/components/ChatPoll";
+import MatchWeekSimulator from "@/components/MatchWeekSimulator";
 import { Home, Shuffle, Shirt, Users, MessageCircle, Settings, User } from "lucide-react";
 
 const tabs = [
