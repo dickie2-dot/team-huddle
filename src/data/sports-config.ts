@@ -5,7 +5,7 @@ export interface SportConfig {
   name: string;
   team_size: number;
   max_players: number;
-  sport_category: "team" | "racket" | "bat" | "other";
+  sport_category: "field sport" | "court sport" | "racket sport" | "bat sport" | "other";
   emoji: string;
 }
 
