@@ -319,7 +319,7 @@ const LockerRoom = () => {
                     <h3 className="font-display font-bold text-foreground text-lg">
                       Secure Your Spot
                     </h3>
-                    <p className="text-3xl font-display font-extrabold text-foreground">£5</p>
+                    <p className="text-3xl font-display font-extrabold text-foreground"><p className="text-3xl font-display font-extrabold text-foreground">£6</p></p>
                     <p className="text-xs text-muted-foreground">Match fee for this week</p>
                   </div>
 
