@@ -77,7 +77,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [activeSection, setActiveSection] = useState<"matches" | "roster" | "settings" | "admins">("matches");
+  const [activeSection, setActiveSection] = useState<"matches" | "roster" | "settings" | "admins" | "auto-captain">("matches");
 
   // Match settings
   const [matchSettings, setMatchSettings] = useState<MatchSettings>({
