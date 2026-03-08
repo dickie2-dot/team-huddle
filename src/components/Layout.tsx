@@ -1,6 +1,6 @@
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Home, Swords, MessageCircle, Banknote, User } from "lucide-react";
+import { Home, Compass, Swords, MessageCircle, Banknote, User } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 
 const tabs = [
