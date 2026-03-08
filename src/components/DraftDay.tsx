@@ -98,9 +98,9 @@ const DraftDay = () => {
       if (count > 15) {
         clearInterval(intervalRef.current);
         const shuffled = [...players].sort(() => Math.random() - 0.5);
-        const half = Math.ceil(shuffled.length / 2);
-        setHomeTeam(shuffled.slice(0, half));
-        setAwayTeam(shuffled.slice(half));
+        const teamSize = activeSport.team_size;
+        setHomeTeam(shuffled.slice(0, teamSize));
+        setAwayTeam(shuffled.slice(teamSize, teamSize * 2));
         setShufflePositions({});
         setPhase("done");
       }
