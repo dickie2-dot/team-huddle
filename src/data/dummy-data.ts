@@ -217,29 +217,64 @@ export const DUMMY_FINES: DummyFine[] = [
 
 // ── Kitty Transactions ──
 export const DUMMY_KITTY_TRANSACTIONS: DummyKittyTransaction[] = [
-  { id: "kt1", label: "Match Fees (Mar 5)", amount: 84, type: "in", date: "2026-03-05" },
-  { id: "kt2", label: "New Bibs", amount: 45, type: "out", date: "2026-03-03" },
-  { id: "kt3", label: "Pitch Booking (Mar 5)", amount: 30, type: "out", date: "2026-03-01" },
-  { id: "kt4", label: "Match Fees (Feb 28)", amount: 84, type: "in", date: "2026-02-28" },
-  { id: "kt5", label: "Pitch Booking (Feb 28)", amount: 35, type: "out", date: "2026-02-26" },
-  { id: "kt6", label: "Fine Pot (Feb)", amount: 22, type: "in", date: "2026-02-25" },
-  { id: "kt7", label: "Match Fees (Feb 19)", amount: 72, type: "in", date: "2026-02-19" },
+  { id: "kt1", label: "Match Fees (Mar 5)", amount: 84, type: "in", date: "2026-03-05", source: "match_fee" },
+  { id: "kt2", label: "New Bibs", amount: 45, type: "out", date: "2026-03-03", source: "expense" },
+  { id: "kt3", label: "Pitch Booking (Mar 5)", amount: 30, type: "out", date: "2026-03-01", source: "expense" },
+  { id: "kt4", label: "Match Fees (Feb 28)", amount: 84, type: "in", date: "2026-02-28", source: "match_fee" },
+  { id: "kt5", label: "Pitch Booking (Feb 28)", amount: 35, type: "out", date: "2026-02-26", source: "expense" },
+  { id: "kt6", label: "Late to match fine", amount: 2, type: "in", date: "2026-03-05", source: "fine", player_name: "Sam Okafor" },
+  { id: "kt7", label: "Own goal fine", amount: 5, type: "in", date: "2026-03-05", source: "fine", player_name: "Ryan Choi" },
+  { id: "kt8", label: "Nutmegged fine", amount: 3, type: "in", date: "2026-02-28", source: "fine", player_name: "Jake Thornton" },
+  { id: "kt9", label: "Hungover fine", amount: 10, type: "in", date: "2026-02-28", source: "fine", player_name: "Leo Vasquez" },
+  { id: "kt10", label: "Forgot bibs fine", amount: 5, type: "in", date: "2026-03-05", source: "fine", player_name: "Dan Mitchell" },
+  { id: "kt11", label: "Terrible haircut fine", amount: 2, type: "in", date: "2026-02-28", source: "fine", player_name: "Kai Brennan" },
+  { id: "kt12", label: "Stepovers fine", amount: 2, type: "in", date: "2026-02-19", source: "fine", player_name: "Tom Ashford" },
+  { id: "kt13", label: "Missed sitter fine", amount: 3, type: "in", date: "2026-02-19", source: "fine", player_name: "Finn Gallagher" },
+  { id: "kt14", label: "Match Fees (Feb 19)", amount: 72, type: "in", date: "2026-02-19", source: "match_fee" },
+  { id: "kt15", label: "Wrong boots fine", amount: 3, type: "in", date: "2026-02-19", source: "fine", player_name: "Sam Okafor" },
+  { id: "kt16", label: "Late fine", amount: 2, type: "in", date: "2026-02-28", source: "fine", player_name: "Ryan Choi" },
+  { id: "kt17", label: "Missed sitter fine", amount: 3, type: "in", date: "2026-02-28", source: "fine", player_name: "Marcus Reid" },
+  { id: "kt18", label: "Stepovers fine", amount: 2, type: "in", date: "2026-03-05", source: "fine", player_name: "Jake Thornton" },
+  { id: "kt19", label: "VAR complaint fine", amount: 2, type: "in", date: "2026-03-05", source: "fine", player_name: "Nate Pearson" },
+  { id: "kt20", label: "Forgot balls fine", amount: 5, type: "in", date: "2026-02-19", source: "fine", player_name: "Leo Vasquez" },
 ];
 
-export const KITTY_BALANCE = 252.0;
+// Kitty balance = sum of all in - sum of all out
+export const KITTY_BALANCE = 289.0;
 
-// ── Player Contributions ──
-export const DUMMY_CONTRIBUTIONS = [
-  { name: "Marcus Reid", amount: 36 },
-  { name: "Jake Thornton", amount: 36 },
-  { name: "Leo Vasquez", amount: 30 },
-  { name: "Sam Okafor", amount: 36 },
-  { name: "Dan Mitchell", amount: 30 },
-  { name: "Kai Brennan", amount: 36 },
-  { name: "Tom Ashford", amount: 18 },
-  { name: "Ryan Choi", amount: 18 },
-  { name: "Finn Gallagher", amount: 12 },
-  { name: "Nate Pearson", amount: 36 },
+// ── Player Contributions (includes source) ──
+export interface DummyContribution {
+  name: string;
+  amount: number;
+  source: "fine" | "voluntary";
+  label?: string;
+}
+
+export const DUMMY_CONTRIBUTIONS: DummyContribution[] = [
+  { name: "Marcus Reid", amount: 36, source: "voluntary" },
+  { name: "Marcus Reid", amount: 3, source: "fine", label: "Missed sitter" },
+  { name: "Jake Thornton", amount: 36, source: "voluntary" },
+  { name: "Jake Thornton", amount: 3, source: "fine", label: "Nutmegged" },
+  { name: "Jake Thornton", amount: 2, source: "fine", label: "Too many stepovers" },
+  { name: "Leo Vasquez", amount: 30, source: "voluntary" },
+  { name: "Leo Vasquez", amount: 10, source: "fine", label: "Hungover" },
+  { name: "Leo Vasquez", amount: 5, source: "fine", label: "Forgot the balls" },
+  { name: "Sam Okafor", amount: 36, source: "voluntary" },
+  { name: "Sam Okafor", amount: 2, source: "fine", label: "Late to match" },
+  { name: "Sam Okafor", amount: 3, source: "fine", label: "Wrong boots" },
+  { name: "Dan Mitchell", amount: 30, source: "voluntary" },
+  { name: "Dan Mitchell", amount: 5, source: "fine", label: "Forgot bibs" },
+  { name: "Kai Brennan", amount: 36, source: "voluntary" },
+  { name: "Kai Brennan", amount: 2, source: "fine", label: "Terrible haircut" },
+  { name: "Tom Ashford", amount: 18, source: "voluntary" },
+  { name: "Tom Ashford", amount: 2, source: "fine", label: "Too many stepovers" },
+  { name: "Ryan Choi", amount: 18, source: "voluntary" },
+  { name: "Ryan Choi", amount: 5, source: "fine", label: "Own goal" },
+  { name: "Ryan Choi", amount: 2, source: "fine", label: "Late to match" },
+  { name: "Finn Gallagher", amount: 12, source: "voluntary" },
+  { name: "Finn Gallagher", amount: 3, source: "fine", label: "Missed sitter" },
+  { name: "Nate Pearson", amount: 36, source: "voluntary" },
+  { name: "Nate Pearson", amount: 2, source: "fine", label: "VAR complaint" },
 ];
 
 // ── Bib History ──
