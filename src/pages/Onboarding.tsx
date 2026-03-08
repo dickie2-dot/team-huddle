@@ -11,6 +11,7 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  Plus,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SUPPORTED_SPORTS, getSportById, createCustomSportConfig } from "@/data/sports-config";
+import type { SportConfig } from "@/data/sports-config";
 
 type Mode = "create" | "join";
 type StripeStatus = "Not Connected" | "Pending" | "Connected";
@@ -37,8 +40,44 @@ const Onboarding = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  // Custom sport state
+  const [isCustomSport, setIsCustomSport] = useState(false);
+  const [customSportName, setCustomSportName] = useState("");
+  const [customTeamSize, setCustomTeamSize] = useState("");
+  const [customMaxPlayers, setCustomMaxPlayers] = useState("");
+
+  const selectedSport: SportConfig | undefined = isCustomSport
+    ? undefined
+    : getSportById(sportType);
+
+  const handleSportChange = (value: string) => {
+    if (value === "__custom") {
+      setIsCustomSport(true);
+      setSportType("");
+    } else {
+      setIsCustomSport(false);
+      setSportType(value);
+      setCustomSportName("");
+      setCustomTeamSize("");
+      setCustomMaxPlayers("");
+    }
+  };
+
+  const getResolvedSport = (): SportConfig | null => {
+    if (isCustomSport) {
+      if (!customSportName.trim() || !customTeamSize || !customMaxPlayers) return null;
+      return createCustomSportConfig({
+        name: customSportName.trim(),
+        team_size: parseInt(customTeamSize),
+        max_players: parseInt(customMaxPlayers),
+      });
+    }
+    return selectedSport ?? null;
+  };
+
   const handleCreateClub = async () => {
-    if (!clubName.trim() || !sportType) {
+    const sport = getResolvedSport();
+    if (!clubName.trim() || !sport) {
       setErrorMessage("Please fill in all fields.");
       return;
     }
@@ -47,7 +86,7 @@ const Onboarding = () => {
 
     // Placeholder: In production, this would create a club record
     await new Promise((r) => setTimeout(r, 1000));
-    setSuccessMessage(`"${clubName}" created! Redirecting...`);
+    setSuccessMessage(`"${clubName}" created! ${sport.emoji} ${sport.name} — ${sport.team_size}v${sport.team_size} (max ${sport.max_players} players)`);
     setLoading(false);
 
     setTimeout(() => navigate("/"), 1500);
@@ -61,7 +100,6 @@ const Onboarding = () => {
     setLoading(true);
     setErrorMessage("");
 
-    // Placeholder: In production, this would validate the invite code
     await new Promise((r) => setTimeout(r, 1000));
 
     if (inviteCode.toUpperCase() === "INVALID") {
@@ -77,7 +115,6 @@ const Onboarding = () => {
 
   const handleStripeConnect = () => {
     setStripeStatus("Pending");
-    // Placeholder: In production, this would trigger Stripe Connect OAuth
     setTimeout(() => setStripeStatus("Connected"), 2000);
   };
 
@@ -172,17 +209,91 @@ const Onboarding = () => {
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
                   Sport Type
                 </label>
-                <Select value={sportType} onValueChange={setSportType}>
+                <Select
+                  value={isCustomSport ? "__custom" : sportType}
+                  onValueChange={handleSportChange}
+                >
                   <SelectTrigger className="rounded-xl">
                     <SelectValue placeholder="Select a sport" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="football">Football</SelectItem>
-                    <SelectItem value="basketball">Basketball</SelectItem>
-                    <SelectItem value="padel">Padel</SelectItem>
+                    {SUPPORTED_SPORTS.map((sport) => (
+                      <SelectItem key={sport.id} value={sport.id}>
+                        {sport.emoji} {sport.name} ({sport.team_size}v{sport.team_size})
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="__custom">
+                      <span className="flex items-center gap-1">
+                        <Plus className="w-3 h-3" /> Custom Sport
+                      </span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
+
+                {/* Sport info badge */}
+                {selectedSport && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="mt-2 p-2.5 rounded-lg bg-primary/5 border border-primary/10"
+                  >
+                    <p className="text-[11px] text-muted-foreground">
+                      <span className="font-semibold text-foreground">{selectedSport.emoji} {selectedSport.name}</span>
+                      {" — "}
+                      {selectedSport.team_size}v{selectedSport.team_size} · Max {selectedSport.max_players} players · {selectedSport.sport_category}
+                    </p>
+                  </motion.div>
+                )}
               </div>
+
+              {/* Custom sport fields */}
+              {isCustomSport && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  className="space-y-3 p-3 rounded-xl bg-secondary/30 border border-border/30"
+                >
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Custom Sport Details
+                  </p>
+                  <Input
+                    value={customSportName}
+                    onChange={(e) => setCustomSportName(e.target.value)}
+                    placeholder="Sport name"
+                    className="rounded-xl"
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">
+                        Team Size
+                      </label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={30}
+                        value={customTeamSize}
+                        onChange={(e) => setCustomTeamSize(e.target.value)}
+                        placeholder="e.g. 6"
+                        className="rounded-xl"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-semibold text-muted-foreground mb-1 block">
+                        Max Players
+                      </label>
+                      <Input
+                        type="number"
+                        min={2}
+                        max={60}
+                        value={customMaxPlayers}
+                        onChange={(e) => setCustomMaxPlayers(e.target.value)}
+                        placeholder="e.g. 12"
+                        className="rounded-xl"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
 
               {/* Stripe Connect */}
               <div>

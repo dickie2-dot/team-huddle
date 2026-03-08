@@ -91,9 +91,9 @@ export interface DummyNotification {
 
 // ── Clubs ──
 export const DUMMY_CLUBS: DummyClub[] = [
-  { id: "c1", name: "Hackney Wanderers FC", sport: "Football", invite_code: "HACK2024", match_fee: 6, max_players: 14, created_at: "2024-09-01" },
-  { id: "c2", name: "South London Ballers", sport: "Basketball", invite_code: "SLBC5678", match_fee: 8, max_players: 10, created_at: "2024-10-15" },
-  { id: "c3", name: "Paddington Padel Club", sport: "Padel", invite_code: "PADL9012", match_fee: 12, max_players: 4, created_at: "2025-01-10" },
+  { id: "c1", name: "Hackney Wanderers FC", sport_id: "football", sport: "Football", invite_code: "HACK2024", match_fee: 6, max_players: 14, team_size: 7, created_at: "2024-09-01" },
+  { id: "c2", name: "South London Ballers", sport_id: "basketball", sport: "Basketball", invite_code: "SLBC5678", match_fee: 8, max_players: 10, team_size: 5, created_at: "2024-10-15" },
+  { id: "c3", name: "Paddington Padel Club", sport_id: "padel", sport: "Padel", invite_code: "PADL9012", match_fee: 12, max_players: 4, team_size: 2, created_at: "2025-01-10" },
 ];
 
 // ── Players (30) ──

@@ -228,7 +228,7 @@ const DraftDay = () => {
       >
         <h2 className="text-2xl font-display font-extrabold text-foreground">Draft Day</h2>
         <p className="text-xs text-muted-foreground font-medium">
-          {players.length} players in the pool
+          {activeSport.emoji} {activeSport.name} — {activeSport.team_size}v{activeSport.team_size} · {players.length} players in the pool
         </p>
       </motion.div>
 

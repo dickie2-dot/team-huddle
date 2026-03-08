@@ -200,11 +200,11 @@ const LockerRoom = () => {
       </motion.div>
 
       {/* Player Grid */}
-      <div>
+        <div>
         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">
-          The Squad
+          The Squad — {activeSport.emoji} {activeSport.name} ({activeSport.team_size}v{activeSport.team_size})
         </h3>
-        <div className="grid grid-cols-7 gap-2">
+        <div className={`grid gap-2 ${MAX_PLAYERS <= 4 ? "grid-cols-4" : MAX_PLAYERS <= 10 ? "grid-cols-5" : "grid-cols-7"}`}>
           {players.map((player, i) => (
             <motion.div
               key={player.id}
