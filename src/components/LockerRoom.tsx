@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { MapPin, Clock, Users, Zap, Check, Lock, CreditCard, Loader2 } from "lucide-react";
+import MatchRecap from "@/components/MatchRecap";
 import { DUMMY_CLUBS } from "@/data/dummy-data";
 import { getSportById, getDefaultSport } from "@/data/sports-config";
 import type { SportConfig } from "@/data/sports-config";
