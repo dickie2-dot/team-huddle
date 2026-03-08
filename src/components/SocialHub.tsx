@@ -1,27 +1,13 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, TrendingUp, TrendingDown, RotateCw, PartyPopper, X, Users } from "lucide-react";
+import { Coins, TrendingUp, TrendingDown, RotateCw, PartyPopper, X, Users, Banknote } from "lucide-react";
 import confetti from "canvas-confetti";
-
-/* ── Kitty Data (placeholder) ── */
-const KITTY_BALANCE = 245.5;
-const KITTY_UPDATED = "Today, 6:32 PM";
-
-const TRANSACTIONS = [
-  { label: "Match Fees", amount: 70, type: "in" as const },
-  { label: "New Bibs", amount: 45, type: "out" as const },
-  { label: "Pitch Booking", amount: 30, type: "out" as const },
-];
-
-const PLAYER_CONTRIBUTIONS = [
-  { name: "Marcus Reid", amount: 12 },
-  { name: "Jake Thornton", amount: 12 },
-  { name: "Leo Vasquez", amount: 6 },
-  { name: "Sam Okafor", amount: 12 },
-  { name: "Dan Mitchell", amount: 6 },
-  { name: "Kai Brennan", amount: 12 },
-  { name: "Ryan Choi", amount: 6 },
-];
+import {
+  DUMMY_KITTY_TRANSACTIONS,
+  KITTY_BALANCE,
+  DUMMY_CONTRIBUTIONS,
+  type DummyContribution,
+} from "@/data/dummy-data";
 
 /* ── Wheel Data ── */
 const ACTIVITIES = [
@@ -40,16 +26,16 @@ const ACTIVITIES = [
 const SEGMENT_ANGLE = 360 / ACTIVITIES.length;
 
 const SEGMENT_COLORS = [
-  "hsl(150 75% 36%)",   /* primary green */
-  "hsl(28 100% 52%)",   /* accent orange */
-  "hsl(160 85% 28%)",   /* deep green */
-  "hsl(150 75% 44%)",   /* lighter green */
-  "hsl(28 80% 46%)",    /* warm orange */
-  "hsl(150 60% 30%)",   /* forest green */
-  "hsl(220 25% 18%)",   /* foreground dark */
-  "hsl(12 90% 48%)",    /* warm red-orange */
-  "hsl(150 75% 50%)",   /* bright green */
-  "hsl(28 100% 42%)",   /* deep orange */
+  "hsl(150 75% 36%)",
+  "hsl(140 65% 28%)",
+  "hsl(160 85% 32%)",
+  "hsl(145 70% 42%)",
+  "hsl(155 60% 25%)",
+  "hsl(150 80% 38%)",
+  "hsl(135 55% 30%)",
+  "hsl(165 75% 34%)",
+  "hsl(148 65% 45%)",
+  "hsl(158 70% 22%)",
 ];
 
 function drawWheel(canvas: HTMLCanvasElement) {
@@ -104,6 +90,29 @@ const SocialHub = () => {
   const [showContributions, setShowContributions] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wheelDrawn = useRef(false);
+
+  // Aggregate contributions by player
+  const aggregatedContributions = DUMMY_CONTRIBUTIONS.reduce<
+    Record<string, { voluntary: number; fines: number; fineDetails: string[] }>
+  >((acc, c) => {
+    if (!acc[c.name]) acc[c.name] = { voluntary: 0, fines: 0, fineDetails: [] };
+    if (c.source === "fine") {
+      acc[c.name].fines += c.amount;
+      if (c.label) acc[c.name].fineDetails.push(c.label);
+    } else {
+      acc[c.name].voluntary += c.amount;
+    }
+    return acc;
+  }, {});
+
+  const contributionsList = Object.entries(aggregatedContributions)
+    .map(([name, data]) => ({ name, ...data, total: data.voluntary + data.fines }))
+    .sort((a, b) => b.total - a.total);
+
+  // Fine total from contributions
+  const fineTotal = DUMMY_CONTRIBUTIONS
+    .filter((c) => c.source === "fine")
+    .reduce((sum, c) => sum + c.amount, 0);
 
   const canvasCallback = useCallback((node: HTMLCanvasElement | null) => {
     if (node && !wheelDrawn.current) {
@@ -168,10 +177,10 @@ const SocialHub = () => {
           £{KITTY_BALANCE.toFixed(2)}
         </p>
         <p className="text-[10px] text-muted-foreground mt-1 font-medium">
-          Last updated: {KITTY_UPDATED}
+          Includes £{fineTotal} from fines
         </p>
 
-        {/* Player Contributions */}
+        {/* Player Contributions with source */}
         <AnimatePresence>
           {showContributions && (
             <motion.div
@@ -185,11 +194,25 @@ const SocialHub = () => {
                   Contributions
                 </h4>
                 <div className="space-y-1">
-                  {PLAYER_CONTRIBUTIONS.map((pc, i) => (
+                  {contributionsList.map((pc, i) => (
                     <div key={i} className="flex items-center justify-between py-1.5">
-                      <span className="text-xs font-medium text-foreground">{pc.name}</span>
-                      <span className="text-xs font-bold text-primary tabular-nums">
-                        £{pc.amount.toFixed(2)}
+                      <div className="min-w-0">
+                        <span className="text-xs font-medium text-foreground block">{pc.name}</span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {pc.voluntary > 0 && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
+                              £{pc.voluntary} voluntary
+                            </span>
+                          )}
+                          {pc.fines > 0 && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent font-semibold">
+                              £{pc.fines} fines
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold text-primary tabular-nums shrink-0">
+                        £{pc.total.toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -200,26 +223,43 @@ const SocialHub = () => {
         </AnimatePresence>
 
         <div className="mt-4 space-y-1">
-          {TRANSACTIONS.map((tx, i) => (
+          {DUMMY_KITTY_TRANSACTIONS.slice(0, 6).map((tx, i) => (
             <div
-              key={i}
+              key={tx.id}
               className="flex items-center justify-between py-2.5 border-b border-border/50 last:border-0"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 {tx.type === "in" ? (
-                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <TrendingUp className="w-3 h-3 text-primary" />
-                  </div>
+                  tx.source === "fine" ? (
+                    <div className="w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                      <Banknote className="w-3 h-3 text-accent" />
+                    </div>
+                  ) : (
+                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <TrendingUp className="w-3 h-3 text-primary" />
+                    </div>
+                  )
                 ) : (
-                  <div className="w-6 h-6 rounded-lg bg-destructive/10 flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
                     <TrendingDown className="w-3 h-3 text-destructive" />
                   </div>
                 )}
-                <span className="text-sm font-medium text-foreground">{tx.label}</span>
+                <div className="min-w-0">
+                  <span className="text-sm font-medium text-foreground block truncate">
+                    {tx.source === "fine" && tx.player_name
+                      ? `${tx.player_name} – ${tx.label}`
+                      : tx.label}
+                  </span>
+                  {tx.source === "fine" && (
+                    <span className="text-[9px] text-accent font-semibold">Fine</span>
+                  )}
+                </div>
               </div>
               <span
-                className={`text-sm font-bold tabular-nums ${
-                  tx.type === "in" ? "text-primary" : "text-destructive"
+                className={`text-sm font-bold tabular-nums shrink-0 ${
+                  tx.type === "in"
+                    ? tx.source === "fine" ? "text-accent" : "text-primary"
+                    : "text-destructive"
                 }`}
               >
                 {tx.type === "in" ? "+" : "-"}£{tx.amount.toFixed(2)}

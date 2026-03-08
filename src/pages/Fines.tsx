@@ -8,6 +8,7 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
+  Coins,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -134,7 +135,7 @@ const Fines = () => {
             </p>
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
           <div className="flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
             <span className="text-xs font-medium text-muted-foreground">
@@ -147,6 +148,12 @@ const Fines = () => {
               Unpaid: <span className="text-accent font-bold">£{unpaidTotal}</span>
             </span>
           </div>
+        </div>
+        <div className="flex items-center gap-1.5 mt-2.5 pt-2.5 border-t border-border/50">
+          <Coins className="w-3.5 h-3.5 text-primary" />
+          <span className="text-[10px] font-semibold text-primary">
+            Added to Social Kitty
+          </span>
         </div>
       </motion.div>
 
