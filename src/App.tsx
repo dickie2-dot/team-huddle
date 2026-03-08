@@ -12,6 +12,7 @@ import Payment from "./pages/Payment";
 import Fines from "./pages/Fines";
 import Matches from "./pages/Matches";
 import LockerRoom from "@/components/LockerRoom";
+import FindGame from "@/components/FindGame";
 import ChatPoll from "@/components/ChatPoll";
 import NotFound from "./pages/NotFound";
 
