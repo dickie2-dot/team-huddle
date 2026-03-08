@@ -40,16 +40,16 @@ const ACTIVITIES = [
 const SEGMENT_ANGLE = 360 / ACTIVITIES.length;
 
 const SEGMENT_COLORS = [
-  "hsl(150 75% 36%)",
-  "hsl(28 100% 52%)",
-  "hsl(220 70% 50%)",
-  "hsl(0 80% 58%)",
-  "hsl(280 60% 50%)",
-  "hsl(150 75% 26%)",
-  "hsl(45 100% 50%)",
-  "hsl(190 80% 42%)",
-  "hsl(340 70% 50%)",
-  "hsl(100 60% 40%)",
+  "hsl(150 75% 36%)",   /* primary green */
+  "hsl(28 100% 52%)",   /* accent orange */
+  "hsl(160 85% 28%)",   /* deep green */
+  "hsl(150 75% 44%)",   /* lighter green */
+  "hsl(28 80% 46%)",    /* warm orange */
+  "hsl(150 60% 30%)",   /* forest green */
+  "hsl(220 25% 18%)",   /* foreground dark */
+  "hsl(12 90% 48%)",    /* warm red-orange */
+  "hsl(150 75% 50%)",   /* bright green */
+  "hsl(28 100% 42%)",   /* deep orange */
 ];
 
 function drawWheel(canvas: HTMLCanvasElement) {
