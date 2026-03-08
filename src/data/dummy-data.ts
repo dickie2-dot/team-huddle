@@ -3,10 +3,12 @@
 export interface DummyClub {
   id: string;
   name: string;
+  sport_id: string;
   sport: string;
   invite_code: string;
   match_fee: number;
   max_players: number;
+  team_size: number;
   created_at: string;
 }
 
