@@ -111,7 +111,7 @@ const ChatPoll = () => {
         }))
       );
       setPolls(
-        DUMMY_POLLS.map((p) => ({ ...p, is_active: true }))
+        DUMMY_POLLS.map((p) => ({ ...p, is_active: true, created_at: new Date().toISOString() }))
       );
       setLoading(false);
     }
