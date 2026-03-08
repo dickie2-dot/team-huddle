@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, X, Users, MessageCircle, Swords, Shirt, Coins, BarChart3, Banknote, CheckCircle2 } from "lucide-react";
+import { Bell, X, Users, MessageCircle, Swords, Shirt, Coins, BarChart3, Banknote, CheckCircle2, Bot, Clock, CreditCard, UserMinus, FileText } from "lucide-react";
 import { DUMMY_NOTIFICATIONS, type DummyNotification } from "@/data/dummy-data";
 
 const typeIcons: Record<DummyNotification["type"], React.ElementType> = {
@@ -12,6 +12,13 @@ const typeIcons: Record<DummyNotification["type"], React.ElementType> = {
   new_message: MessageCircle,
   poll_created: BarChart3,
   fine_issued: Banknote,
+  match_invite: Bot,
+  reminder: Clock,
+  payment_reminder: CreditCard,
+  late_fine: Banknote,
+  spot_open: UserMinus,
+  match_recap: FileText,
+  auto_draft: Swords,
 };
 
 const NotificationBell = () => {

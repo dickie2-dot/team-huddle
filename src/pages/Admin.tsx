@@ -21,6 +21,7 @@ import {
   DollarSign,
   Hash,
   Trophy,
+  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import AutoCaptain from "@/components/AutoCaptain";
 
 interface MatchSettings {
   id?: string;
@@ -77,7 +79,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [activeSection, setActiveSection] = useState<"matches" | "roster" | "settings" | "admins">("matches");
+  const [activeSection, setActiveSection] = useState<"matches" | "roster" | "settings" | "admins" | "auto-captain">("matches");
 
   // Match settings
   const [matchSettings, setMatchSettings] = useState<MatchSettings>({
@@ -282,6 +284,7 @@ const Admin = () => {
 
   const sections = [
     { id: "matches" as const, label: "Matches", icon: Calendar },
+    { id: "auto-captain" as const, label: "Auto", icon: Bot },
     { id: "roster" as const, label: "Roster", icon: Users },
     { id: "settings" as const, label: "Club", icon: Settings },
     { id: "admins" as const, label: "Admins", icon: Shield },
@@ -467,6 +470,9 @@ const Admin = () => {
             </Dialog>
           </motion.div>
         )}
+
+        {/* Auto Captain Section */}
+        {activeSection === "auto-captain" && <AutoCaptain />}
 
         {/* Roster Section */}
         {activeSection === "roster" && (

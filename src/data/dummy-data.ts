@@ -84,7 +84,7 @@ export interface DummyBibHistory {
 
 export interface DummyNotification {
   id: string;
-  type: "match_joined" | "match_full" | "draft_generated" | "bib_washer" | "kitty_winner" | "new_message" | "poll_created" | "fine_issued";
+  type: "match_joined" | "match_full" | "draft_generated" | "bib_washer" | "kitty_winner" | "new_message" | "poll_created" | "fine_issued" | "match_invite" | "reminder" | "payment_reminder" | "late_fine" | "spot_open" | "match_recap" | "auto_draft";
   title: string;
   message: string;
   created_at: string;
@@ -288,12 +288,17 @@ export const DUMMY_BIB_HISTORY: DummyBibHistory[] = [
 
 // ── Notifications ──
 export const DUMMY_NOTIFICATIONS: DummyNotification[] = [
-  { id: "n1", type: "match_joined", title: "Player Joined", message: "Leo Vasquez secured a spot for Thursday", created_at: "2026-03-08T10:30:00Z", read: false },
-  { id: "n2", type: "new_message", title: "New Message", message: "Nate Pearson: Let's smash it this week lads 🔥", created_at: "2026-03-08T10:00:00Z", read: false },
-  { id: "n3", type: "fine_issued", title: "Fine Issued", message: "Ryan Choi fined £5 for Own goal ⚽", created_at: "2026-03-05T21:00:00Z", read: false },
-  { id: "n4", type: "draft_generated", title: "Draft Generated", message: "Teams have been drafted for Thursday Night Football", created_at: "2026-03-05T18:30:00Z", read: true },
-  { id: "n5", type: "bib_washer", title: "Bib Washer Selected", message: "Ryan Choi is on bib duty this week 👕", created_at: "2026-03-05T21:15:00Z", read: true },
-  { id: "n6", type: "match_full", title: "Match Full", message: "Thursday Night Football is now full (14/14)", created_at: "2026-03-04T14:00:00Z", read: true },
-  { id: "n7", type: "poll_created", title: "New Poll", message: "Vote: What time works best for next Thursday?", created_at: "2026-03-03T12:00:00Z", read: true },
-  { id: "n8", type: "kitty_winner", title: "Wheel Winner", message: "Activity Roulette landed on Go-Karting! 🏎️", created_at: "2026-03-01T20:00:00Z", read: true },
+  { id: "n1", type: "match_invite", title: "🤖 Auto Captain", message: "New match: Thursday Night Football — Secure your spot!", created_at: "2026-03-08T12:00:00Z", read: false },
+  { id: "n2", type: "match_joined", title: "Player Joined", message: "Leo Vasquez secured a spot for Thursday", created_at: "2026-03-08T10:30:00Z", read: false },
+  { id: "n3", type: "reminder", title: "🤖 Reminder", message: "Thursday's match is in 24 hours — join now!", created_at: "2026-03-08T10:00:00Z", read: false },
+  { id: "n4", type: "payment_reminder", title: "🤖 Payment Due", message: "You've joined Thursday but haven't paid £6 yet", created_at: "2026-03-08T09:00:00Z", read: false },
+  { id: "n5", type: "fine_issued", title: "Fine Issued", message: "Ryan Choi fined £5 for Own goal ⚽", created_at: "2026-03-05T21:00:00Z", read: true },
+  { id: "n6", type: "auto_draft", title: "🤖 Auto Draft", message: "Roster full! Teams auto-generated for Thursday Night Football", created_at: "2026-03-05T18:30:00Z", read: true },
+  { id: "n7", type: "bib_washer", title: "Bib Washer Selected", message: "Ryan Choi is on bib duty this week 👕", created_at: "2026-03-05T21:15:00Z", read: true },
+  { id: "n8", type: "match_full", title: "Match Full", message: "Thursday Night Football is now full (14/14)", created_at: "2026-03-04T14:00:00Z", read: true },
+  { id: "n9", type: "spot_open", title: "🤖 Spot Open!", message: "Will Harper dropped out — 1 spot available for Thursday!", created_at: "2026-03-04T10:00:00Z", read: true },
+  { id: "n10", type: "late_fine", title: "🤖 Late Fine", message: "Finn Gallagher auto-fined £2 for late payment → Social Kitty", created_at: "2026-03-03T20:00:00Z", read: true },
+  { id: "n11", type: "match_recap", title: "🤖 Match Recap", message: "Thursday Night Football recap: Top scorer Marcus Reid (3) 🏆", created_at: "2026-03-05T22:00:00Z", read: true },
+  { id: "n12", type: "poll_created", title: "New Poll", message: "Vote: What time works best for next Thursday?", created_at: "2026-03-03T12:00:00Z", read: true },
+  { id: "n13", type: "kitty_winner", title: "Wheel Winner", message: "Activity Roulette landed on Go-Karting! 🏎️", created_at: "2026-03-01T20:00:00Z", read: true },
 ];
