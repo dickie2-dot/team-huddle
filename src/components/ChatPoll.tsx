@@ -7,14 +7,20 @@ import {
   MessageCircle,
   Check,
   Loader2,
+  Smile,
+  AlertCircle,
 } from "lucide-react";
+import { DUMMY_MESSAGES, DUMMY_POLLS } from "@/data/dummy-data";
 
 interface Message {
   id: string;
   user_id: string;
+  user_name?: string;
+  user_initials?: string;
   content: string;
   created_at: string;
   profile?: { display_name: string | null; avatar_url: string | null };
+  reactions?: { emoji: string; count: number; reacted: boolean }[];
 }
 
 interface Poll {
@@ -26,49 +32,90 @@ interface Poll {
   user_vote?: string;
 }
 
+const REACTION_EMOJIS = ["👍", "😂", "🔥", "❤️", "😢", "🙏"];
+
 const ChatPoll = () => {
   const [tab, setTab] = useState<"chat" | "polls">("chat");
   const [messages, setMessages] = useState<Message[]>([]);
   const [polls, setPolls] = useState<Poll[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const [unreadCount, setUnreadCount] = useState(2);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setCurrentUserId(user?.id || null);
-    });
-    loadMessages();
-    loadPolls();
-
-    // Realtime subscription for messages
-    const channel = supabase
-      .channel("chat-messages")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
-        async (payload) => {
-          const newMsg = payload.new as any;
-          // Fetch profile for the new message
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("display_name, avatar_url")
-            .eq("user_id", newMsg.user_id)
-            .maybeSingle();
-
-          setMessages((prev) => [
-            ...prev,
-            { ...newMsg, profile: profile || undefined },
-          ]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    init();
   }, []);
+
+  const init = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+      await loadMessages();
+      await loadPolls();
+
+      // Realtime subscription
+      const channel = supabase
+        .channel("chat-messages")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages" },
+          async (payload) => {
+            const newMsg = payload.new as any;
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("display_name, avatar_url")
+              .eq("user_id", newMsg.user_id)
+              .maybeSingle();
+
+            setMessages((prev) => [
+              ...prev,
+              { ...newMsg, profile: profile || undefined },
+            ]);
+          }
+        )
+        .subscribe();
+
+      // Fake typing indicator
+      const typingInterval = setInterval(() => {
+        const names = ["Jake", "Leo", "Sam"];
+        const shouldShow = Math.random() > 0.7;
+        setTypingUsers(shouldShow ? [names[Math.floor(Math.random() * names.length)]] : []);
+      }, 4000);
+
+      setLoading(false);
+
+      return () => {
+        supabase.removeChannel(channel);
+        clearInterval(typingInterval);
+      };
+    } catch {
+      setError("Failed to load chat. Showing offline data.");
+      // Fallback to dummy data
+      setMessages(
+        DUMMY_MESSAGES.map((m) => ({
+          id: m.id,
+          user_id: m.user_initials,
+          user_name: m.user_name,
+          user_initials: m.user_initials,
+          content: m.content,
+          created_at: m.created_at,
+          reactions: m.reactions,
+        }))
+      );
+      setPolls(
+        DUMMY_POLLS.map((p) => ({ ...p, is_active: true }))
+      );
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -82,7 +129,6 @@ const ChatPoll = () => {
       .limit(100);
 
     if (data && data.length > 0) {
-      // Fetch profiles for all message authors
       const userIds = [...new Set(data.map((m) => m.user_id))];
       const { data: profiles } = await supabase
         .from("profiles")
@@ -94,6 +140,19 @@ const ChatPoll = () => {
         profile: profiles?.find((p) => p.user_id === msg.user_id),
       }));
       setMessages(enriched);
+    } else {
+      // Use dummy messages as fallback
+      setMessages(
+        DUMMY_MESSAGES.map((m) => ({
+          id: m.id,
+          user_id: m.user_initials,
+          user_name: m.user_name,
+          user_initials: m.user_initials,
+          content: m.content,
+          created_at: m.created_at,
+          reactions: m.reactions,
+        }))
+      );
     }
   };
 
@@ -104,11 +163,14 @@ const ChatPoll = () => {
       .eq("is_active", true)
       .order("created_at", { ascending: false });
 
-    if (!pollsData) return;
+    if (!pollsData || pollsData.length === 0) {
+      setPolls(DUMMY_POLLS.map((p) => ({ ...p, is_active: true })));
+      return;
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
-
     const enrichedPolls: Poll[] = [];
+
     for (const poll of pollsData) {
       const { data: options } = await supabase
         .from("poll_options")
@@ -149,6 +211,19 @@ const ChatPoll = () => {
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
+      // Offline mode — add dummy message
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `local-${Date.now()}`,
+          user_id: "me",
+          user_name: "You",
+          user_initials: "ME",
+          content: newMessage.trim(),
+          created_at: new Date().toISOString(),
+        },
+      ]);
+      setNewMessage("");
       setSending(false);
       return;
     }
@@ -164,16 +239,22 @@ const ChatPoll = () => {
 
   const vote = async (pollId: string, optionId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      // Offline vote
+      setPolls((prev) =>
+        prev.map((p) =>
+          p.id === pollId ? { ...p, user_vote: optionId } : p
+        )
+      );
+      return;
+    }
 
-    // Remove existing vote first
     await supabase
       .from("poll_votes")
       .delete()
       .eq("poll_id", pollId)
       .eq("user_id", user.id);
 
-    // Cast new vote
     await supabase.from("poll_votes").insert({
       poll_id: pollId,
       option_id: optionId,
@@ -183,20 +264,79 @@ const ChatPoll = () => {
     await loadPolls();
   };
 
+  const toggleReaction = (msgId: string, emoji: string) => {
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id !== msgId) return msg;
+        const reactions = msg.reactions || [];
+        const existing = reactions.find((r) => r.emoji === emoji);
+        if (existing) {
+          return {
+            ...msg,
+            reactions: existing.reacted
+              ? reactions.filter((r) => r.emoji !== emoji || r.count > 1).map((r) =>
+                  r.emoji === emoji ? { ...r, count: r.count - 1, reacted: false } : r
+                )
+              : reactions.map((r) =>
+                  r.emoji === emoji ? { ...r, count: r.count + 1, reacted: true } : r
+                ),
+          };
+        }
+        return {
+          ...msg,
+          reactions: [...reactions, { emoji, count: 1, reacted: true }],
+        };
+      })
+    );
+    setShowReactionPicker(null);
+  };
+
   const getInitials = (name: string | null | undefined) => {
     if (!name) return "?";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase();
+    return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
   };
 
   const formatTime = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const today = new Date();
+    if (d.toDateString() === today.toDateString()) return "Today";
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
+    return d.toLocaleDateString([], { month: "short", day: "numeric" });
+  };
+
+  // Group messages by sender for consecutive messages
+  const shouldShowHeader = (msg: Message, i: number) => {
+    if (i === 0) return true;
+    const prev = messages[i - 1];
+    const userId = msg.user_id;
+    const prevUserId = prev.user_id;
+    if (userId !== prevUserId) return true;
+    // Show header if more than 5 minutes apart
+    const timeDiff = new Date(msg.created_at).getTime() - new Date(prev.created_at).getTime();
+    return timeDiff > 5 * 60 * 1000;
+  };
+
+  // Date separators
+  const shouldShowDate = (msg: Message, i: number) => {
+    if (i === 0) return true;
+    const prev = messages[i - 1];
+    return new Date(msg.created_at).toDateString() !== new Date(prev.created_at).toDateString();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -214,8 +354,8 @@ const ChatPoll = () => {
           Chat
         </button>
         <button
-          onClick={() => setTab("polls")}
-          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all flex-1 justify-center ${
+          onClick={() => { setTab("polls"); }}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all flex-1 justify-center relative ${
             tab === "polls"
               ? "bg-primary text-primary-foreground shadow-sm"
               : "bg-secondary/60 text-muted-foreground hover:bg-secondary"
@@ -226,6 +366,13 @@ const ChatPoll = () => {
         </button>
       </div>
 
+      {error && (
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-accent/10 border border-accent/20 text-accent text-xs font-medium">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          {error}
+        </div>
+      )}
+
       <AnimatePresence mode="wait">
         {tab === "chat" ? (
           <motion.div
@@ -235,57 +382,159 @@ const ChatPoll = () => {
             exit={{ opacity: 0, x: 10 }}
             className="space-y-3"
           >
-            {/* Messages */}
             <div className="card-elevated rounded-2xl overflow-hidden">
-              <div className="h-[360px] overflow-y-auto p-4 space-y-3">
+              <div className="h-[380px] overflow-y-auto p-4 space-y-1">
                 {messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground space-y-2">
                     <MessageCircle className="w-10 h-10 opacity-30" />
                     <p className="text-sm">No messages yet. Start the chat!</p>
                   </div>
                 ) : (
-                  messages.map((msg) => {
-                    const isMe = msg.user_id === currentUserId;
+                  messages.map((msg, i) => {
+                    const isMe = msg.user_id === currentUserId || msg.user_id === "me";
+                    const showHeader = shouldShowHeader(msg, i);
+                    const showDate = shouldShowDate(msg, i);
+                    const displayName = msg.user_name || msg.profile?.display_name || "Unknown";
+
                     return (
-                      <motion.div
-                        key={msg.id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`flex gap-2.5 ${isMe ? "flex-row-reverse" : ""}`}
-                      >
-                        {/* Avatar */}
-                        {msg.profile?.avatar_url ? (
-                          <img
-                            src={msg.profile.avatar_url}
-                            alt=""
-                            className="w-8 h-8 rounded-full object-cover shrink-0"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
-                            {getInitials(msg.profile?.display_name)}
+                      <div key={msg.id}>
+                        {showDate && (
+                          <div className="flex justify-center my-3">
+                            <span className="text-[10px] font-semibold text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full">
+                              {formatDate(msg.created_at)}
+                            </span>
                           </div>
                         )}
-                        <div className={`max-w-[75%] ${isMe ? "text-right" : ""}`}>
-                          <p className="text-[10px] font-semibold text-muted-foreground mb-0.5 px-1">
-                            {msg.profile?.display_name || "Unknown"}
-                          </p>
-                          <div
-                            className={`px-3.5 py-2 rounded-2xl text-sm leading-relaxed ${
-                              isMe
-                                ? "bg-primary text-primary-foreground rounded-br-md"
-                                : "bg-secondary/70 text-foreground rounded-bl-md"
-                            }`}
-                          >
-                            {msg.content}
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`flex gap-2.5 ${isMe ? "flex-row-reverse" : ""} ${
+                            showHeader ? "mt-3" : "mt-0.5"
+                          }`}
+                        >
+                          {/* Avatar — only show on first in group */}
+                          {showHeader ? (
+                            msg.profile?.avatar_url ? (
+                              <img
+                                src={msg.profile.avatar_url}
+                                alt=""
+                                className="w-8 h-8 rounded-full object-cover shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
+                                {msg.user_initials || getInitials(displayName)}
+                              </div>
+                            )
+                          ) : (
+                            <div className="w-8 shrink-0" />
+                          )}
+                          <div className={`max-w-[75%] ${isMe ? "text-right" : ""}`}>
+                            {showHeader && (
+                              <p className="text-[10px] font-semibold text-muted-foreground mb-0.5 px-1">
+                                {displayName}
+                              </p>
+                            )}
+                            <div
+                              className={`px-3.5 py-2 rounded-2xl text-sm leading-relaxed relative group ${
+                                isMe
+                                  ? "bg-primary text-primary-foreground rounded-br-md"
+                                  : "bg-secondary/70 text-foreground rounded-bl-md"
+                              }`}
+                            >
+                              {msg.content}
+                              {/* Reaction button */}
+                              <button
+                                onClick={() => setShowReactionPicker(showReactionPicker === msg.id ? null : msg.id)}
+                                className="absolute -bottom-2 right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-card border border-border rounded-full p-0.5 shadow-sm"
+                              >
+                                <Smile className="w-3 h-3 text-muted-foreground" />
+                              </button>
+                            </div>
+
+                            {/* Reactions */}
+                            {msg.reactions && msg.reactions.length > 0 && (
+                              <div className={`flex gap-1 mt-1 px-1 ${isMe ? "justify-end" : ""}`}>
+                                {msg.reactions.map((r) => (
+                                  <button
+                                    key={r.emoji}
+                                    onClick={() => toggleReaction(msg.id, r.emoji)}
+                                    className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] border transition-colors ${
+                                      r.reacted
+                                        ? "bg-primary/10 border-primary/20 text-primary"
+                                        : "bg-secondary/50 border-border text-muted-foreground hover:bg-secondary"
+                                    }`}
+                                  >
+                                    {r.emoji} {r.count}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Reaction picker */}
+                            <AnimatePresence>
+                              {showReactionPicker === msg.id && (
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.9 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  exit={{ opacity: 0, scale: 0.9 }}
+                                  className={`flex gap-1 mt-1 bg-card border border-border rounded-full px-2 py-1 shadow-md ${
+                                    isMe ? "justify-end" : ""
+                                  }`}
+                                >
+                                  {REACTION_EMOJIS.map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => toggleReaction(msg.id, emoji)}
+                                      className="text-base hover:scale-125 transition-transform p-0.5"
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+
+                            <p className="text-[9px] text-muted-foreground mt-0.5 px-1">
+                              {formatTime(msg.created_at)}
+                            </p>
                           </div>
-                          <p className="text-[9px] text-muted-foreground mt-0.5 px-1">
-                            {formatTime(msg.created_at)}
-                          </p>
-                        </div>
-                      </motion.div>
+                        </motion.div>
+                      </div>
                     );
                   })
                 )}
+
+                {/* Typing indicator */}
+                {typingUsers.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex gap-2.5 mt-2"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-secondary/60 flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-bold text-muted-foreground">
+                        {typingUsers[0]?.[0]}
+                      </span>
+                    </div>
+                    <div className="bg-secondary/70 rounded-2xl rounded-bl-md px-4 py-2.5 flex items-center gap-1">
+                      <div className="flex gap-1">
+                        {[0, 1, 2].map((i) => (
+                          <motion.div
+                            key={i}
+                            className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50"
+                            animate={{ y: [0, -4, 0] }}
+                            transition={{
+                              repeat: Infinity,
+                              duration: 0.6,
+                              delay: i * 0.15,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
                 <div ref={messagesEndRef} />
               </div>
 
@@ -325,7 +574,7 @@ const ChatPoll = () => {
               <div className="card-elevated p-8 text-center space-y-2">
                 <BarChart3 className="w-10 h-10 text-muted-foreground/30 mx-auto" />
                 <p className="text-sm text-muted-foreground">
-                  No active polls. Admins can create them from the admin panel.
+                  No active polls. Admins can create them from the dashboard.
                 </p>
               </div>
             ) : (
@@ -355,7 +604,6 @@ const ChatPoll = () => {
                                 : "border-border hover:border-primary/20 hover:bg-secondary/30"
                             }`}
                           >
-                            {/* Progress bar bg */}
                             <div
                               className="absolute inset-0 bg-primary/10 transition-all"
                               style={{ width: `${pct}%` }}
