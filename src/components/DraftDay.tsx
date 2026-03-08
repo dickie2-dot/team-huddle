@@ -2,7 +2,11 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Shuffle, Swords, ArrowLeftRight, RotateCcw, Loader2 } from "lucide-react";
-import { DUMMY_PLAYERS } from "@/data/dummy-data";
+import { DUMMY_PLAYERS, DUMMY_CLUBS } from "@/data/dummy-data";
+import { getSportById, getDefaultSport } from "@/data/sports-config";
+
+const activeClub = DUMMY_CLUBS[0];
+const activeSport = getSportById(activeClub.sport_id) ?? getDefaultSport();
 
 interface DraftPlayer {
   id: string;
@@ -94,9 +98,9 @@ const DraftDay = () => {
       if (count > 15) {
         clearInterval(intervalRef.current);
         const shuffled = [...players].sort(() => Math.random() - 0.5);
-        const half = Math.ceil(shuffled.length / 2);
-        setHomeTeam(shuffled.slice(0, half));
-        setAwayTeam(shuffled.slice(half));
+        const teamSize = activeSport.team_size;
+        setHomeTeam(shuffled.slice(0, teamSize));
+        setAwayTeam(shuffled.slice(teamSize, teamSize * 2));
         setShufflePositions({});
         setPhase("done");
       }
@@ -224,7 +228,7 @@ const DraftDay = () => {
       >
         <h2 className="text-2xl font-display font-extrabold text-foreground">Draft Day</h2>
         <p className="text-xs text-muted-foreground font-medium">
-          {players.length} players in the pool
+          {activeSport.emoji} {activeSport.name} — {activeSport.team_size}v{activeSport.team_size} · {players.length} players in the pool
         </p>
       </motion.div>
 

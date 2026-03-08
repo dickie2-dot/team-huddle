@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { MapPin, Clock, Users, Zap, Check, Lock, CreditCard, Loader2 } from "lucide-react";
+import { DUMMY_CLUBS } from "@/data/dummy-data";
+import { getSportById, getDefaultSport } from "@/data/sports-config";
+import type { SportConfig } from "@/data/sports-config";
 
 interface PlayerData {
   id: string;
@@ -11,7 +14,10 @@ interface PlayerData {
   paymentStatus: "Paid" | "Pending" | "None";
 }
 
-const MAX_PLAYERS = 14;
+// Active club — in production this comes from context/auth; for now use first dummy club
+const activeClub = DUMMY_CLUBS[0];
+const activeSport: SportConfig = getSportById(activeClub.sport_id) ?? getDefaultSport();
+const MAX_PLAYERS = activeSport.max_players;
 
 const LockerRoom = () => {
   const [players, setPlayers] = useState<PlayerData[]>([]);
@@ -194,11 +200,11 @@ const LockerRoom = () => {
       </motion.div>
 
       {/* Player Grid */}
-      <div>
+        <div>
         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">
-          The Squad
+          The Squad — {activeSport.emoji} {activeSport.name} ({activeSport.team_size}v{activeSport.team_size})
         </h3>
-        <div className="grid grid-cols-7 gap-2">
+        <div className={`grid gap-2 ${MAX_PLAYERS <= 4 ? "grid-cols-4" : MAX_PLAYERS <= 10 ? "grid-cols-5" : "grid-cols-7"}`}>
           {players.map((player, i) => (
             <motion.div
               key={player.id}
