@@ -74,6 +74,9 @@ const Index = () => {
         </AnimatePresence>
       </main>
 
+      {/* Match Week Simulator */}
+      <MatchWeekSimulator />
+
       {/* Bottom Nav */}
       <nav className="sticky bottom-0 bg-card/95 backdrop-blur-md border-t border-border px-2 py-1.5 pb-safe">
         <div className="flex items-center justify-around max-w-lg mx-auto">
