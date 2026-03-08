@@ -5,10 +5,10 @@ import NotificationBell from "@/components/NotificationBell";
 
 const tabs = [
   { path: "/locker-room", label: "Home", icon: Home },
+  { path: "/find-game", label: "Find", icon: Compass },
   { path: "/draft", label: "Matches", icon: Swords },
   { path: "/chat", label: "Chat", icon: MessageCircle },
   { path: "/fines", label: "Fines", icon: Banknote },
-  { path: "/profile", label: "Profile", icon: User },
 ] as const;
 
 const Layout = () => {

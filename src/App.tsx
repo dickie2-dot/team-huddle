@@ -34,6 +34,7 @@ const App = () => (
           {/* Main app with bottom nav */}
           <Route element={<Layout />}>
             <Route path="/locker-room" element={<LockerRoom />} />
+            <Route path="/find-game" element={<FindGame />} />
             <Route path="/draft" element={<Matches />} />
             <Route path="/bib-washer" element={<Navigate to="/draft" replace />} />
             <Route path="/social-kitty" element={<Navigate to="/draft" replace />} />
