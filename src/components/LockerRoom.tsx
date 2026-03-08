@@ -363,6 +363,9 @@ const LockerRoom = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Match Recap */}
+      <MatchRecap />
     </div>
   );
 };

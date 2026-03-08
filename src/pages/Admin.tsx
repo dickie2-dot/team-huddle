@@ -471,6 +471,9 @@ const Admin = () => {
           </motion.div>
         )}
 
+        {/* Auto Captain Section */}
+        {activeSection === "auto-captain" && <AutoCaptain />}
+
         {/* Roster Section */}
         {activeSection === "roster" && (
           <motion.div
