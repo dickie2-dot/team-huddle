@@ -84,7 +84,7 @@ export interface DummyBibHistory {
 
 export interface DummyNotification {
   id: string;
-  type: "match_joined" | "match_full" | "draft_generated" | "bib_washer" | "kitty_winner" | "new_message" | "poll_created" | "fine_issued";
+  type: "match_joined" | "match_full" | "draft_generated" | "bib_washer" | "kitty_winner" | "new_message" | "poll_created" | "fine_issued" | "match_invite" | "reminder" | "payment_reminder" | "late_fine" | "spot_open" | "match_recap" | "auto_draft";
   title: string;
   message: string;
   created_at: string;
