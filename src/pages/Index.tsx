@@ -7,6 +7,7 @@ import DraftDay from "@/components/DraftDay";
 import KitDuty from "@/components/KitDuty";
 import SocialHub from "@/components/SocialHub";
 import ChatPoll from "@/components/ChatPoll";
+import MatchWeekSimulator from "@/components/MatchWeekSimulator";
 import { Home, Shuffle, Shirt, Users, MessageCircle, Settings, User } from "lucide-react";
 
 const tabs = [
@@ -72,6 +73,9 @@ const Index = () => {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* Match Week Simulator */}
+      <MatchWeekSimulator />
 
       {/* Bottom Nav */}
       <nav className="sticky bottom-0 bg-card/95 backdrop-blur-md border-t border-border px-2 py-1.5 pb-safe">
