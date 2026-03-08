@@ -164,7 +164,7 @@ const ChatPoll = () => {
       .order("created_at", { ascending: false });
 
     if (!pollsData || pollsData.length === 0) {
-      setPolls(DUMMY_POLLS.map((p) => ({ ...p, is_active: true })));
+      setPolls(DUMMY_POLLS.map((p) => ({ ...p, is_active: true, created_at: new Date().toISOString() })));
       return;
     }
 
