@@ -1,14 +1,14 @@
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Home, Swords, MessageCircle, Banknote, User } from "lucide-react";
+import { Home, Compass, Swords, MessageCircle, Banknote, User } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 
 const tabs = [
   { path: "/locker-room", label: "Home", icon: Home },
+  { path: "/find-game", label: "Find", icon: Compass },
   { path: "/draft", label: "Matches", icon: Swords },
   { path: "/chat", label: "Chat", icon: MessageCircle },
   { path: "/fines", label: "Fines", icon: Banknote },
-  { path: "/profile", label: "Profile", icon: User },
 ] as const;
 
 const Layout = () => {
