@@ -9,6 +9,7 @@ const tabs = [
   { path: "/draft", label: "Matches", icon: Swords },
   { path: "/chat", label: "Chat", icon: MessageCircle },
   { path: "/fines", label: "Fines", icon: Banknote },
+  { path: "/profile", label: "Profile", icon: User },
 ] as const;
 
 const Layout = () => {
