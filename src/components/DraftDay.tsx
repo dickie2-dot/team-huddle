@@ -2,7 +2,11 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Shuffle, Swords, ArrowLeftRight, RotateCcw, Loader2 } from "lucide-react";
-import { DUMMY_PLAYERS } from "@/data/dummy-data";
+import { DUMMY_PLAYERS, DUMMY_CLUBS } from "@/data/dummy-data";
+import { getSportById, getDefaultSport } from "@/data/sports-config";
+
+const activeClub = DUMMY_CLUBS[0];
+const activeSport = getSportById(activeClub.sport_id) ?? getDefaultSport();
 
 interface DraftPlayer {
   id: string;
